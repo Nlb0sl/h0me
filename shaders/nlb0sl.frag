@@ -1,243 +1,148 @@
 #version 300 es
 precision highp float;
-
 in vec2 v_uv;
 out vec4 fragColor;
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
-// nlb0sl / specimen 06
-// A single morphing specimen, six orbiting signals, an impossible identification portrait.
+// nlb0sl / TYPE FIELD
+// Repeated, rigid metal letterforms. Motion belongs to light and elevation.
+const float WIDTH = .090;
+const float BEVEL = .023;
+const vec2 PITCH = vec2(1.0, 1.30);
 const float PI = 3.14159265359;
-const float TAU = 6.28318530718;
 
-mat2 rotate(float a) {
-    float c = cos(a), s = sin(a);
-    return mat2(c, s, -s, c);
-}
 float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
 }
-float stroke(float d, float width, float aa) {
-    return 1.0 - smoothstep(width, width + aa, abs(d));
+float line(vec2 p,vec2 a,vec2 b) {
+    vec2 v=b-a;
+    return length(p-a-v*clamp(dot(p-a,v)/dot(v,v),0.,1.));
 }
-float segment(vec2 p, vec2 a, vec2 b) {
-    vec2 v = b - a;
-    return length(p - a - v * clamp(dot(p - a, v) / dot(v, v), 0.0, 1.0));
+float ellipse(vec2 p,vec2 r) {
+    return abs(length(p/r)-1.)*min(r.x,r.y);
 }
-
-// Five-by-seven bitmap alphabet. Each integer stores one row.
-int glyphRow(int letter, int row) {
-    const int n[7] = int[7](0,0,22,25,17,17,17);
-    const int l[7] = int[7](12,4,4,4,4,4,14);
-    const int b[7] = int[7](16,16,22,25,17,25,22);
-    const int z[7] = int[7](14,17,19,21,25,17,14);
-    const int s[7] = int[7](0,0,15,16,14,1,30);
-    if (letter == 0) return n[row];
-    if (letter == 1 || letter == 5) return l[row];
-    if (letter == 2) return b[row];
-    if (letter == 3) return z[row];
-    return s[row];
-}
-float signature(vec2 p) {
-    vec2 cell = floor(p);
-    if (cell.x < 0.0 || cell.x >= 35.0 || cell.y < 0.0 || cell.y >= 7.0) return 0.0;
-    int letter = int(cell.x) / 6;
-    int column = int(cell.x) % 6;
-    if (column >= 5) return 0.0;
-    int row = 6 - int(cell.y);
-    int bit = (glyphRow(letter, row) >> (4 - column)) & 1;
-    return float(bit);
-}
-
-// One three-dimensional specimen, six sequential identities.
-const float HOLD = 1.25;
-const float MORPH = 2.15;
-const float THICKNESS = .108;
-const float DEPTH = .052;
-const float BEVEL = .020;
-const float WOBBLE = .065;
-const int STEPS = 28;
-vec3 nodes[STEPS + 1];
-
-
-vec2 bezier(vec2 a, vec2 b, vec2 c, vec2 d, float t) {
-    vec2 ab = mix(a,b,t);
-    vec2 bc = mix(b,c,t);
-    vec2 cd = mix(c,d,t);
-    return mix(mix(ab,bc,t), mix(bc,cd,t), t);
-}
-
-vec2 glyph(int id, float u) {
-    float x = clamp(u,0.0,1.0)*4.0;
-    int k = min(int(x),3);
-    float t = x-float(k);
-    // n
-    if (id == 0) {
-        if(k==0) return bezier(vec2(-.30,-.45),vec2(-.30,-.22),vec2(-.30,.02),vec2(-.30,.24),t);
-        if(k==1) return bezier(vec2(-.30,.24),vec2(-.24,.35),vec2(-.12,.39),vec2(0.,.35),t);
-        if(k==2) return bezier(vec2(0.,.35),vec2(.22,.35),vec2(.30,.22),vec2(.30,.04),t);
-        return bezier(vec2(.30,.04),vec2(.30,-.13),vec2(.30,-.29),vec2(.30,-.45),t);
+float glyph(vec2 p,int id) {
+    float d=10.;
+    if(id==0) {
+        d=min(line(p,vec2(-.27,-.43),vec2(-.27,.23)),
+              line(p,vec2(.27,-.43),vec2(.27,.04)));
+        vec2 q=p-vec2(0.,.04);
+        d=min(d,q.y>=0.?ellipse(q,vec2(.27,.24)):
+              min(length(q-vec2(-.27,0.)),length(q-vec2(.27,0.))));
+    } else if(id==1 || id==5) {
+        d=line(p,vec2(-.07,.49),vec2(-.07,-.29));
+        d=min(d,line(p,vec2(-.07,-.29),vec2(.015,-.42)));
+        d=min(d,line(p,vec2(.015,-.42),vec2(.19,-.42)));
+    } else if(id==2) {
+        d=line(p,vec2(-.27,-.43),vec2(-.27,.49));
+        d=min(d,ellipse(p-vec2(.015,-.10),vec2(.285,.33)));
+    } else if(id==3) {
+        d=ellipse(p-vec2(0.,.015),vec2(.28,.43));
+        // Slashed zero, joined to the bowl.
+        d=min(d,line(p,vec2(-.185,-.275),vec2(.185,.305)));
+    } else {
+        vec2 a=vec2(.25,.23), b=vec2(.055,.30), c=vec2(-.19,.22);
+        vec2 e=vec2(-.25,.085), f=vec2(-.15,-.025), g=vec2(.16,-.12);
+        vec2 h=vec2(.25,-.245), j=vec2(.13,-.395), k=vec2(-.10,-.43), l=vec2(-.26,-.35);
+        d=min(line(p,a,b),line(p,b,c));
+        d=min(d,min(line(p,c,e),line(p,e,f)));
+        d=min(d,min(line(p,f,g),line(p,g,h)));
+        d=min(d,min(line(p,h,j),line(p,j,k)));
+        d=min(d,line(p,k,l));
     }
-    // l: a tall stem and soft foot
-    if (id == 1 || id == 5) {
-        if(k==0) return bezier(vec2(-.10,.57),vec2(-.10,.42),vec2(-.10,.25),vec2(-.10,.11),t);
-        if(k==1) return bezier(vec2(-.10,.11),vec2(-.10,-.04),vec2(-.10,-.19),vec2(-.10,-.27),t);
-        if(k==2) return bezier(vec2(-.10,-.27),vec2(-.10,-.43),vec2(-.03,-.46),vec2(.10,-.46),t);
-        return bezier(vec2(.10,-.46),vec2(.14,-.46),vec2(.19,-.45),vec2(.23,-.43),t);
-    }
-    // b: stem flows into the bowl, which joins the stem again
-    if (id == 2) {
-        if(k==0) return bezier(vec2(-.29,.57),vec2(-.29,.25),vec2(-.29,-.13),vec2(-.29,-.43),t);
-        if(k==1) return bezier(vec2(-.29,-.43),vec2(-.02,-.55),vec2(.34,-.47),vec2(.34,-.12),t);
-        if(k==2) return bezier(vec2(.34,-.12),vec2(.34,.14),vec2(.12,.30),vec2(-.08,.24),t);
-        return bezier(vec2(-.08,.24),vec2(-.17,.21),vec2(-.24,.15),vec2(-.29,.08),t);
-    }
-    // 0: closed continuous oval
-    if (id == 3) {
-        if(k==0) return bezier(vec2(-.34,0.),vec2(-.34,.28),vec2(-.19,.49),vec2(0.,.49),t);
-        if(k==1) return bezier(vec2(0.,.49),vec2(.19,.49),vec2(.34,.28),vec2(.34,0.),t);
-        if(k==2) return bezier(vec2(.34,0.),vec2(.34,-.28),vec2(.19,-.49),vec2(0.,-.49),t);
-        return bezier(vec2(0.,-.49),vec2(-.19,-.49),vec2(-.34,-.28),vec2(-.34,0.),t);
-    }
-    // s: two soft bends
-    if(k==0) return bezier(vec2(.29,.29),vec2(.02,.48),vec2(-.34,.33),vec2(-.29,.13),t);
-    if(k==1) return bezier(vec2(-.29,.13),vec2(-.26,-.02),vec2(-.04,.01),vec2(.13,-.08),t);
-    if(k==2) return bezier(vec2(.13,-.08),vec2(.40,-.17),vec2(.34,-.40),vec2(.08,-.45),t);
-    return bezier(vec2(.08,-.45),vec2(-.06,-.48),vec2(-.21,-.45),vec2(-.31,-.36),t);
+    return d-WIDTH;
 }
-
-
-void prepareMorph(float t) {
-    float duration = HOLD + MORPH;
-    float slot = mod(t, duration * 6.0);
-    int from = int(floor(slot / duration));
-    int to = (from + 1) % 6;
-    float phase = clamp((mod(slot,duration) - HOLD) / MORPH, 0.0, 1.0);
-    float blend = phase * phase * (3.0 - 2.0 * phase);
-    float energy = sin(PI * blend);
-    for (int i=0; i<=STEPS; ++i) {
-        float u = float(i)/float(STEPS);
-        vec2 xy = mix(glyph(from,u),glyph(to,u),blend) * 1.04;
-        // Spatial waves keep closed loops joined. Surface motion is
-        // intentionally subdued when a readable letter is held.
-        vec2 original = xy;
-        float wobble = .009 + WOBBLE * energy;
-        xy += wobble * vec2(
-            sin(original.y*9.0 + original.x*4.0 - t*1.8),
-            cos(original.x*8.0 - original.y*5.0 + t*1.5));
-        float z = (.008 + .055*energy)*sin(original.x*5.0 + original.y*4.0 + t*1.4);
-        nodes[i] = vec3(xy,z);
+float topHeight(vec2 cell,float t) {
+    float wave=.5+.5*sin(cell.x*.69+cell.y*.83-t*.70);
+    return .105+.28*pow(wave,3.);
+}
+float letterSDF(vec3 p,float t) {
+    vec2 cell=floor(p.xy/PITCH+.5);
+    vec2 local=p.xy-cell*PITCH;
+    int id=int(mod(cell.x+3.,6.));
+    float h=topHeight(cell,t);
+    // Extruded lettering: fixed outlines, constant width, bevelled edges.
+    vec2 d=vec2(glyph(local,id)+BEVEL,abs(p.z-h*.5)-(h*.5-BEVEL));
+    return length(max(d,0.))+min(max(d.x,d.y),0.)-BEVEL;
+}
+float scene(vec3 p,float t) {
+    return min(p.z,letterSDF(p,t));
+}
+vec3 normalAt(vec3 p,float t) {
+    vec2 e=vec2(.003,0.);
+    return normalize(vec3(scene(p+e.xyy,t)-scene(p-e.xyy,t),
+                          scene(p+e.yxy,t)-scene(p-e.yxy,t),
+                          scene(p+e.yyx,t)-scene(p-e.yyx,t)));
+}
+float shadow(vec3 p,vec3 direction,float t) {
+    float s=.025, shade=1.;
+    for(int i=0;i<32;i++) {
+        vec3 q=p+direction*s;
+        if(q.z>.45) break;
+        float d=letterSDF(q,t);
+        if(d<.003) return .17;
+        shade=min(shade,12.*d/s);
+        s+=clamp(d*.75,.012,.105);
+        if(s>1.4) break;
     }
-}
-
-vec3 objectSpace(vec3 p, float t) {
-    float duration=HOLD+MORPH;
-    float phase=clamp((mod(t,duration)-HOLD)/MORPH,0.0,1.0);
-    float energy=sin(PI*phase);
-    // Face the camera while readable; turn in depth during metamorphosis.
-    p.xz = rotate((.15+.80*energy)*sin(t*.72) + (u_mouse.x-.5)*.65) * p.xz;
-    p.yz = rotate((.12+.38*energy)*sin(t*.51) + (u_mouse.y-.5)*.45) * p.yz;
-    p.xy = rotate((.07+.21*energy)*sin(t*.63)) * p.xy;
-    return p;
-}
-float field(vec3 p,float t) {
-    p=objectSpace(p,t);
-    // A continuous flat ribbon with a machined, softly beveled edge.
-    // Width and depth are independent, unlike the old tubular specimen.
-    float d=10.0;
-    for(int i=0;i<STEPS;++i) {
-        vec3 a=nodes[i], b=nodes[i+1];
-        vec2 v=b.xy-a.xy;
-        float u=clamp(dot(p.xy-a.xy,v)/max(dot(v,v),.000001),0.0,1.0);
-        vec3 c=mix(a,b,u);
-        vec2 w=vec2(length(p.xy-c.xy)-(THICKNESS-BEVEL),
-                    abs(p.z-c.z)-(DEPTH-BEVEL));
-        float slab=length(max(w,0.0))+min(max(w.x,w.y),0.0)-BEVEL;
-        d=min(d,slab);
-    }
-    return d;
-}
-vec3 normalAt(vec3 p, float t) {
-    vec2 e = vec2(0.002, 0.0);
-    return normalize(vec3(field(p + e.xyy,t) - field(p - e.xyy,t),
-                          field(p + e.yxy,t) - field(p - e.yxy,t),
-                          field(p + e.yyx,t) - field(p - e.yyx,t)));
+    return mix(.17,1.,clamp(shade,0.,1.));
 }
 void main() {
-    float t = u_time;
-    prepareMorph(t);
-    float aa = 2.0 / max(u_resolution.y, 1.0);
-    vec2 p = (v_uv - 0.5) * 2.0;
-    p.x *= u_resolution.x / u_resolution.y;
-    p.y -= 0.05;
-    vec2 q = p * 1.43;
+    float t=u_time;
+    float aspect=u_resolution.x/max(u_resolution.y,1.);
+    // Orthographic macro view. Crop the pattern at the edges like a print.
+    vec2 screen=(v_uv-.5)*vec2(aspect,1.)*10.3;
+    vec3 rd=normalize(vec3(-.21,.38,-1.));
+    vec3 right=normalize(cross(rd,vec3(0.,1.,0.)));
+    vec3 up=cross(right,rd);
+    vec3 ro=vec3(.05,-.30,2.2)+right*screen.x+up*screen.y;
+    ro.xy+=(u_mouse-.5)*.18;
+    float travel=max(0.,(.44-ro.z)/rd.z);
+    float end=max(0.,-ro.z/rd.z);
+    vec3 point=ro+rd*end;
+    bool hit=false;
+    for(int i=0;i<72;i++) {
+        if(travel>end) break;
+        vec3 q=ro+rd*travel;
+        float d=letterSDF(q,t);
+        if(d<.003) {point=q;hit=true;break;}
+        // Limit the step near repeating cell boundaries.
+        travel+=clamp(d*.70,.002,.105);
+    }
+    vec3 n=hit?normalAt(point,t):vec3(0.,0.,1.);
 
-    // Paper / measurement field, not a real photograph.
-    vec3 paper = vec3(0.88, 0.89, 0.85);
-    vec3 ink = vec3(0.075, 0.10, 0.095);
-    vec3 color = paper;
-    vec2 grid = abs(fract(p * 13.0 + 0.5) - 0.5);
-    float dots = 1.0 - smoothstep(0.025, 0.075, length(grid));
-    color = mix(color, ink, dots * 0.21);
+    // Grazing studio key light, and a slow diagonal sweep across the field.
+    float angle=.56+.24*sin(t*.19);
+    vec3 light=normalize(vec3(-cos(angle),sin(angle),.58));
+    float sweep=sin(point.x*.52+point.y*.38-t*.38);
+    float spot=.22+.78*smoothstep(-.72,.78,sweep);
+    float cast=shadow(point+n*.018,light,t);
+    float diffuse=max(dot(n,light),0.);
+    float gloss=pow(max(dot(n,normalize(light-rd)),0.),38.);
+    float rim=pow(1.-max(dot(n,-rd),0.),3.);
 
-    float orbit = stroke(length(q * vec2(1.0, 0.85)) - 0.87, 0.0025, aa);
-    color = mix(color, ink, orbit * 0.32);
-    for (int i = 0; i < 6; ++i) {
-        float a = float(i) * TAU / 6.0 + t * 0.19;
-        vec2 satellite = vec2(cos(a), sin(a) / 0.85) * 0.87;
-        float d = length(q - satellite);
-        float mark = stroke(d - 0.028, 0.004, aa)
-                   + (1.0 - smoothstep(0.009, 0.009 + aa, d));
-        color = mix(color, ink, clamp(mark, 0.0, 1.0) * 0.8);
+    vec3 paper=vec3(.83,.84,.80);
+    vec3 dark=vec3(.065,.080,.077);
+    vec3 color;
+    if(hit) {
+        // Satin graphite / silver. No organic surface patterns.
+        vec3 metal=mix(dark,vec3(.74,.77,.73),.26+.57*diffuse*cast*spot);
+        color=metal+vec3(.28,.31,.30)*(gloss*spot*cast+.15*rim);
+    } else {
+        float base=.55+.38*spot;
+        color=paper*base*mix(.53,1.,cast);
+        // Very quiet grid printed beneath the type.
+        vec2 cell=abs(fract(point.xy/PITCH)-.5);
+        float grid=1.-smoothstep(.007,.018,min(.5-cell.x,.5-cell.y));
+        color=mix(color,dark,grid*.045);
     }
 
-    // Raymarch the morphing specimen, clipped to a bounding sphere.
-    vec3 ro = vec3(0.0, 0.0, 3.0);
-    vec3 rd = normalize(vec3(q, -2.55));
-    float b = dot(ro, rd);
-    float h = b*b - dot(ro,ro) + 1.0;
-    float travel = h >= 0.0 ? max(0.0, -b-sqrt(max(h,0.0))) : 6.0;
-    float farLimit = h >= 0.0 ? -b+sqrt(max(h,0.0)) : 0.0;
-    bool hit = false;
-    vec3 point = ro;
-    for (int i = 0; i < 64; ++i) {
-        if (travel > farLimit) break;
-        point = ro + rd * travel;
-        float d = field(point, t);
-        if (d < 0.0018) { hit = true; break; }
-        travel += max(d * 0.72, 0.001);
-        if (travel > 5.0) break;
-    }
-    if (hit) {
-        vec3 n = normalAt(point, t);
-        float diffuse = max(dot(n, normalize(vec3(-0.6, 0.8, 0.9))), 0.0);
-        float rim = pow(1.0 - max(dot(n, -rd), 0.0), 2.0);
-        // Satin ceramic / anodized metal: broad planes, precise edges.
-        vec3 lightDir = normalize(vec3(-0.6, 0.8, 0.9));
-        vec3 halfDir = normalize(lightDir - rd);
-        float specular = pow(max(dot(n, halfDir), 0.0), 24.0);
-        float luminance = clamp(0.20 + diffuse * 0.47 + rim * 0.12 + specular * 0.28, 0.0, 0.94);
-        // Quantized, printed shading.
-        float noise = hash(floor(gl_FragCoord.xy));
-        luminance = floor(luminance * 9.0 + noise) / 9.0;
-        color = mix(ink, paper, luminance);
-    }
-
-    // Scan marks, corner registration marks, and the actual six-letter name.
-    vec2 f = v_uv;
-    vec2 corner = abs(f - 0.5);
-    float cornerX = stroke(corner.x - 0.445, 0.002, aa) * step(0.42, corner.y) * step(corner.y, 0.455);
-    float cornerY = stroke(corner.y - 0.455, 0.002, aa) * step(0.40, corner.x) * step(corner.x, 0.445);
-    color = mix(color, ink, clamp(cornerX + cornerY, 0.0, 1.0) * 0.7);
-    float scanY = 0.5 + 0.32 * sin(t * 0.39);
-    float scan = stroke(f.y - scanY, 0.001, aa) * step(0.07, f.x) * step(f.x, 0.93);
-    color = mix(color, ink, scan * 0.16);
-
-    vec2 textCell = vec2((f.x - 0.29) * 35.0 / 0.42, (f.y - 0.075) * 35.0 / 0.42 * u_resolution.y / u_resolution.x);
-    color = mix(color, ink, signature(textCell));
-    float grain = hash(floor(gl_FragCoord.xy) + floor(t * 8.0) * 7.0) - 0.5;
-    color += grain * 0.035;
-    fragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+    // Fine stochastic print texture, fixed in screen space (no flicker).
+    float grain=hash(floor(gl_FragCoord.xy))-.5;
+    color+=grain*.045;
+    float vignette=1.-.20*dot(v_uv-.5,v_uv-.5);
+    color*=vignette;
+    fragColor=vec4(clamp(color,0.,1.),1.);
 }
