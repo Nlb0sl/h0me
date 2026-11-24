@@ -40,7 +40,10 @@ function mount(canvas,ctx) {
   function makeCloud(w,h,layer){
     const seed=Math.floor(random(1,1000000));
     const sprite=document.createElement("canvas");
-    sprite.width=Math.ceil(w*dpr);sprite.height=Math.ceil(h*dpr);
+    // Leave room for the complete density field, including turbulent edges.
+    const padX=Math.ceil(w*.28),padY=Math.ceil(h*.28);
+    const sw=w+2*padX,sh=h+2*padY;
+    sprite.width=Math.ceil(sw*dpr);sprite.height=Math.ceil(sh*dpr);
     const g=sprite.getContext("2d");
     g.scale(dpr,dpr);
     // A continuous turbulent density field, not individually shaded balls.
@@ -68,14 +71,14 @@ function mount(canvas,ctx) {
       }
       const turbulence=.85*(fbm(u*12,v*10,seed+2)-.5)
         +.36*(fbm(u*33,v*25,seed+3)-.5);
-      const border=smooth(0,.07,u)*smooth(0,.07,1-u)*smooth(0,.07,v)*smooth(0,.09,1-v);
-      return (density+turbulence)*border-.48;
+      // Fade according to cloud density, never distance to a rectangular sprite edge.
+      return density+turbulence*smooth(0,.40,density)-.48;
     }
     const gap=layer.gap,colors=layer.palette;
     const paths=colors.map(()=>[]);
-    for(let row=0,y=gap/2;y<h;y+=gap,row++){
-      for(let col=0,x=gap/2+(row%2)*gap*.5;x<w;x+=gap,col++){
-        const u=x/w,v=y/h,d=field(u,v);
+    for(let row=0,y=gap/2;y<sh;y+=gap,row++){
+      for(let col=0,x=gap/2+(row%2)*gap*.5;x<sw;x+=gap,col++){
+        const u=(x-padX)/w,v=(y-padY)/h,d=field(u,v);
         const edge=smooth(-.07,.30,d);
         if(edge<.025)continue;
         const grain=hash(col,row,seed+7);
@@ -97,13 +100,13 @@ function mount(canvas,ctx) {
       for(const [x,y,r] of dots){g.moveTo(x+r,y);g.arc(x,y,r,0,Math.PI*2);}
       g.fill();
     });
-    return sprite;
+    return {sprite,padX,padY,sw,sh};
   }
   function newCloud(layer,x){
     const w=Math.round(layer.scale*random(.78,1.30));
     const h=Math.round(w*random(.44,.64));
     const y=height*layer.level-h*random(.43,.67);
-    return {sprite:makeCloud(w,h,layer),w,h,x,y};
+    return {...makeCloud(w,h,layer),w,h,x,y};
   }
   function rebuild(){
     const w=Math.max(1,canvas.clientWidth||window.innerWidth);
@@ -141,16 +144,17 @@ function mount(canvas,ctx) {
       for(const cloud of layer.clouds)cloud.x+=layer.speed*dt;
       if(advance){
         // Enter at the left and retire at the right; no repeating strip.
-        layer.clouds=layer.clouds.filter(c=>c.x<width+10);
+        layer.clouds=layer.clouds.filter(c=>c.x-c.padX<width+10);
         const first=layer.clouds[0];
         if(!first||first.x>-layer.scale*.12){
           const next=newCloud(layer,0);
-          next.x=Math.min(-next.w,(first?first.x:0)-next.w*random(1.05,1.40));
+          next.x=Math.min(-next.w-next.padX,(first?first.x:0)-next.w*random(1.05,1.40));
           layer.clouds.unshift(next);
         }
       }
       for(const c of layer.clouds){
-        if(c.x+c.w>0&&c.x<width)ctx.drawImage(c.sprite,c.x,c.y,c.w,c.h);
+        const left=c.x-c.padX,top=c.y-c.padY;
+        if(left+c.sw>0&&left<width)ctx.drawImage(c.sprite,left,top,c.sw,c.sh);
       }
     }
     ctx.globalAlpha=1;
