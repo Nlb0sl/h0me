@@ -1,5 +1,6 @@
 const components = {
   slideshow: () => import("./components/slideshow.js"),
+  shader: () => import("./components/shader.js"),
 };
 
 for (const element of document.querySelectorAll("[data-component]")) {

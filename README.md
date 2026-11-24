@@ -24,6 +24,26 @@ sample-01〜03.svg は動作確認用の抽象的な仮画像。自分の写真�
 autoplayMs を 5000 などにすると自動再生。標準は手動。
 styles/main.css の --photo-fit を contain にすると全体表示、cover にすると画面いっぱいに表示。
 
+## GLSL シェーダー
+
+WebGL 2 / GLSL ES 3.00 を使用。外部ライブラリ不要。
+`shaders/photo.frag` を編集すると、表示中の写真にエフェクトをかけられる。
+標準は薄いフィルムグレイン。Live Preview の再読み込みで反映する。
+GLSL コンパイルエラーはブラウザの開発者ツールの Console で確認。
+GPU非対応・初期化失敗の場合は元のHTML画像が表示される。
+
+- `v_uv`: 0〜1の画面座標（左下原点）
+- `u_photo`: 現在の写真（sampler2D）
+- `u_resolution`: キャンバス解像度
+- `u_photoResolution`: 写真テクスチャ解像度
+- `u_time`: 経過秒
+- `u_mouse`: 正規化したマウス座標（左下原点）
+- `photoUV(v_uv)`: cover / contain 補正済みUV
+- `scripts/data/shader.js`: 有効/無効、連続描画、解像度の設定
+
+`shaders/fullscreen.vert` は全画面描画用。通常は編集不要。
+アニメーション不要なら animated: false で連続描画を止める。
+
 ## 公開
 
 GitHub Pages の Settings → Pages で main / (root) を指定。
