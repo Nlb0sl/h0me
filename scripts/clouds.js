@@ -50,11 +50,12 @@ function mount(canvas,ctx) {
     for(let i=0;i<10;i++){
       const x=.12+i*.084+random(-.025,.025);
       const rise=crest*Math.exp(-Math.pow((x-peak)/random(.20,.34),2));
-      const y=.66-rise*.7+random(-.045,.04);
-      lobes.push([x,y,random(.08,.155),random(.14,.22)+rise*.3]);
-      lobes.push([x,.72+random(-.035,.04),random(.09,.15),random(.10,.17)]);
+      const billow=.5+.5*noise(x*7,2.4,seed+11);
+      const y=.66-rise*(.69+.35*billow)+random(-.055,.045);
+      lobes.push([x,y,random(.074,.147),random(.12,.225)+rise*.37]);
+      lobes.push([x,.70+random(-.035,.04),random(.09,.15),random(.085,.145)]);
       if(i>0&&i<9&&nextRandom()<.75){
-        lobes.push([x+random(-.045,.045),y-random(.07,.14),random(.035,.075),random(.055,.105)]);
+        lobes.push([x+random(-.045,.045),y-random(.09,.17),random(.034,.071),random(.050,.105)]);
       }
     }
     function field(u,v){
@@ -66,8 +67,10 @@ function mount(canvas,ctx) {
         const q=Math.max(0,1-(dx*dx+dy*dy)*.46);
         density+=q*q;
       }
-      const turbulence=.66*(fbm(u*12,v*10,seed+2)-.5)
-        +.23*(fbm(u*33,v*25,seed+3)-.5);
+      // Erosion on multiple scales, stronger near the outside than inside.
+      const erosion=(fbm(u*13,v*11,seed+2)-.5)*.72
+        +(fbm(u*32,v*27,seed+3)-.5)*.30;
+      const turbulence=erosion*(1-.55*smooth(.7,2.4,density));
       const border=smooth(0,.07,u)*smooth(0,.07,1-u)*smooth(0,.07,v)*smooth(0,.09,1-v);
       return (density+turbulence)*border-.48;
     }
@@ -81,11 +84,15 @@ function mount(canvas,ctx) {
         const grain=hash(col,row,seed+7);
         if(grain>Math.min(1,edge*1.5))continue;
         // Diffuse light on a shared density surface; no seams between lobes.
-        const lightFacing=clamp((field(u+.012,v+.020)-field(u-.012,v-.020))*1.4,-.4,.4);
-        const billows=fbm(u*8+11,v*7+4,seed+4);
-        const shadow=smooth(.36,.75,fbm(u*10+5,v*8+23,seed+5));
-        const underside=smooth(.42,.86,v);
-        const t=clamp(.76+lightFacing+(billows-.5)*.94-underside*.47-shadow*.26);
+        // Light from above-left; use optical depth rather than random dark spots.
+        const depth=Math.sqrt(Math.max(0,d)+.15);
+        const ahead=Math.sqrt(Math.max(0,field(u-.021,v-.038))+.15);
+        const behind=Math.sqrt(Math.max(0,field(u+.021,v+.038))+.15);
+        const lightFacing=clamp((behind-ahead)*1.65,-.24,.30);
+        const billows=fbm(u*10+11,v*9+4,seed+4);
+        const underside=smooth(.40,.88,v);
+        const occlusion=smooth(.04,.42,ahead-depth);
+        const t=clamp(.86+lightFacing+(billows-.5)*.48-underside*.47-occlusion*.18);
         const tone=t*(colors.length-1),lo=Math.floor(tone);
         const band=Math.min(colors.length-1,lo+(hash(col,row,seed+19)<tone-lo?1:0));
         const radius=gap*(.32+.16*t)*Math.sqrt(edge)*(.91+.14*grain);
