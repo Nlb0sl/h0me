@@ -61,35 +61,9 @@ main { min-height: 0; }
 .clouds[hidden] { display: none; }
 .clouds--volumetric { display: block; }
 
-/* Clear glass: the moving background remains visible through the surface. */
+/* Keep the content area open, without a visible surface. */
 .clouds { z-index: 0; }
 .shell { z-index: 1; }
 .main {
-  display: grid;
-  align-items: stretch;
-  justify-items: center;
   padding-block: clamp(20px, 3.5vh, 36px);
-}
-.glass-panel {
-  position: relative;
-  isolation: isolate;
-  width: 100%;
-  min-height: clamp(320px, 66vh, 720px);
-  border-radius: 34px;
-  border: 0;
-  background: rgba(255, 255, 255, .045);
-  -webkit-backdrop-filter: blur(2px) saturate(1.06) brightness(1.025);
-  backdrop-filter: blur(2px) saturate(1.06) brightness(1.025);
-  box-shadow: 0 12px 35px rgba(35, 58, 65, .06);
-}
-.glass-panel__content {
-  position: relative;
-  padding: clamp(24px, 4vw, 48px);
-  overflow-wrap: anywhere;
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-panel { background: rgba(255, 255, 255, .09); }
-}
-@media (max-width: 480px) {
-  .glass-panel { border-radius: 24px; min-height: 60vh; }
 }
