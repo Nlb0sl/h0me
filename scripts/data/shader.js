@@ -5,5 +5,5 @@ export const shaderConfig = {
   animated: true, // false: render on image/size/pointer changes only
   maxPixelRatio: 1.5,
   vertex: new URL("../../shaders/fullscreen.vert", import.meta.url),
-  fragment: new URL("../../shaders/nlb0sl.frag", import.meta.url),
+  fragment: new URL("../../shaders/nlb0sl.frag?v=silent-field-1", import.meta.url),
 };
