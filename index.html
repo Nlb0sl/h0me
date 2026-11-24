@@ -8,12 +8,44 @@
   <script type="module" src="./scripts/main.js"></script>
 </head>
 <body>
-  <main class="slideshow" data-component="slideshow shader" aria-label="写真ギャラリー">
-    <img class="slideshow__image" src="./assets/photos/sample-01.svg" alt="仮の画像 1" draggable="false" fetchpriority="high">
-    <canvas class="shader-canvas" aria-hidden="true" hidden></canvas>
-    <button class="slideshow__button slideshow__button--prev" type="button" aria-label="前の写真" hidden>‹</button>
-    <button class="slideshow__button slideshow__button--next" type="button" aria-label="次の写真" hidden>›</button>
-    <span class="sr-only" aria-live="polite" data-status></span>
+  <main class="resume">
+    <header class="resume__heading">
+      <span>PERSONAL RECORD</span>
+      <span>h0me. / 001</span>
+    </header>
+    <div class="identity">
+      <figure class="portrait slideshow" data-component="slideshow shader" aria-label="プロフィール写真">
+        <img class="slideshow__image" src="./assets/photos/sample-01.svg" alt="仮のプロフィール画像" draggable="false" fetchpriority="high">
+        <canvas class="shader-canvas" aria-hidden="true" hidden></canvas>
+        <button class="slideshow__button slideshow__button--prev" type="button" aria-label="前の写真" hidden>‹</button>
+        <button class="slideshow__button slideshow__button--next" type="button" aria-label="次の写真" hidden>›</button>
+        <span class="sr-only" aria-live="polite" data-status></span>
+      </figure>
+      <section class="identity__details" aria-labelledby="name">
+        <div class="identity__name">
+          <span class="field-label">氏名 / NAME</span>
+          <h1 id="name">Nlb0sl</h1>
+        </div>
+        <dl class="fields">
+          <div><dt>肩書き / ROLE</dt><dd>—</dd></div>
+          <div><dt>所在地 / LOCATION</dt><dd>—</dd></div>
+          <div><dt>リンク / LINKS</dt><dd><a href="https://github.com/Nlb0sl">GitHub ↗</a></dd></div>
+        </dl>
+      </section>
+    </div>
+    <section class="record">
+      <h2>自己紹介 <span>ABOUT</span></h2>
+      <div class="record__body">
+        <p>—</p>
+      </div>
+    </section>
+    <section class="record">
+      <h2>興味・活動 <span>INTERESTS</span></h2>
+      <div class="record__body">
+        <p>—</p>
+      </div>
+    </section>
+    <footer class="resume__footer"><span>PERSONAL WEBSITE</span><span>01 / 01</span></footer>
   </main>
 </body>
 </html>

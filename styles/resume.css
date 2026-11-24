@@ -1,0 +1,68 @@
+.resume {
+  width: min(760px, calc(100% - 64px));
+  margin: 64px auto;
+  padding: 32px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+}
+.resume__heading, .resume__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font: 11px/1.5 var(--mono);
+  letter-spacing: .08em;
+}
+.resume__heading { padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.identity {
+  display: grid;
+  grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px 0;
+}
+.portrait.slideshow {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  margin: 0;
+  align-self: start;
+  border: 1px solid var(--rule);
+}
+.identity__details { min-width: 0; display: flex; flex-direction: column; }
+.identity__name { padding: 0 0 12px; border-bottom: 1px solid var(--rule); }
+.field-label, .fields dt, .record h2 span {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+h1 { margin: 4px 0 0; font-size: clamp(28px, 5vw, 48px); line-height: 1.15; letter-spacing: -.05em; font-weight: 600; overflow-wrap: anywhere; }
+.fields { margin: 0; flex: 1; display: flex; flex-direction: column; }
+.fields > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 38%) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.fields dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.record { border-top: 1px solid var(--rule); }
+.record h2 { display: flex; align-items: baseline; gap: 12px; font-size: 13px; font-weight: 600; margin: 0; padding: 9px 0; }
+.record__body { min-height: 96px; border-top: 1px solid var(--rule); padding: 12px 0 20px; font-size: 14px; }
+.record__body p { margin: 0; white-space: pre-wrap; }
+.resume__footer { border-top: 1px solid var(--rule); padding-top: 12px; }
+@media (max-width: 540px) {
+  .resume { width: calc(100% - 24px); margin: 12px auto; padding: 16px; }
+  .identity { grid-template-columns: minmax(0, 34%) minmax(0, 1fr); gap: 12px; padding: 16px 0; }
+  .fields > div { grid-template-columns: 1fr; gap: 2px; padding: 5px 0; }
+  .fields dd { font-size: 12px; }
+  .resume__heading, .resume__footer { font-size: 10px; }
+}
+@media print {
+  body { background: white; }
+  .resume { width: 100%; margin: 0; border: 0; }
+  .slideshow__button { display: none; }
+}
