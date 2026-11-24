@@ -7,7 +7,7 @@ if(frame&&button){
   function apply(){
     frame.dataset.paused=String(paused);
     button.setAttribute("aria-pressed",String(paused));
-    button.textContent=paused?"Play ▶":"Pause Ⅱ";
+    button.textContent=paused?"再生":"停止";
   }
   button.hidden=false;
   button.addEventListener("click",()=>{paused=!paused;frame.dataset.override="true";apply();});

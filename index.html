@@ -4,31 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f2ee">
-  <meta name="description" content="nlb0sl — an independent personal space.">
-  <title>nlb0sl — h0me.</title>
-  <link rel="stylesheet" href="./styles/site.css?v=2">
-  <script type="module" src="./scripts/site.js?v=2"></script>
+  <title>nlb0sl</title>
+  <link rel="stylesheet" href="./styles/site.css?v=3">
+  <script type="module" src="./scripts/site.js?v=3"></script>
 </head>
-<body id="top">
-  <div class="shell">
+<body>
+  <main class="shell">
     <header class="masthead">
-      <a class="wordmark" href="./">h0me<span>.</span></a>
-      <span class="masthead__index">INDEPENDENT<br>PERSONAL SPACE</span>
-      <nav aria-label="メインメニュー"><a href="#index">Index</a><a href="https://github.com/Nlb0sl">GitHub ↗</a></nav>
+      <h1>nlb0sl</h1>
+      <nav aria-label="リンク"><a href="https://github.com/Nlb0sl">GitHub ↗</a></nav>
     </header>
-    <main>
-      <section class="hero" aria-labelledby="identity">
-        <div class="intro">
-          <div class="eyebrow"><span class="dot"></span> PERSONAL INDEX / 000</div>
-          <h1 id="identity">nlb0sl<span>.</span></h1>
-          <p class="intro__jp">まだ名前のついていないものを、<br>置いておく場所。</p>
-          <p class="intro__en">A place for things<br>that do not have a name yet.</p>
-          <a class="index-link" href="#index"><span>EXPLORE THE INDEX</span><span aria-hidden="true">↓</span></a>
-        </div>
-        <figure class="exhibit" id="artwork">
-          <div class="exhibit__frame" data-artwork>
-            <svg class="artwork" viewBox="0 0 480 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="art-title art-desc">
-          <title id="art-title">Aperture — 0の輪郭を横切る光</title>
+    <figure class="exhibit">
+      <div class="exhibit__frame" data-artwork>
+        <svg class="artwork" viewBox="0 0 480 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="art-title art-desc">
+          <title id="art-title">光の輪</title>
           <desc id="art-desc">黒い背景に切り分けられた楕円形の輪が浮かび、細い光が静かに移動する。</desc>
           <defs>
             <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
@@ -94,22 +83,12 @@
               <g class="pointer-light"><rect x="-85" y="-40" width="170" height="520" fill="url(#light)" opacity=".45"/></g>
             </g>
           </g>
-          <g fill="#aeb7b1" font-family="monospace" font-size="8" letter-spacing="1">
-            <text x="32" y="16">OBJECT / 000</text><text x="448" y="16" text-anchor="end">NLB0SL</text>
-            <text x="32" y="433">VISIBLE SPECTRUM</text><text x="448" y="433" text-anchor="end">01 — 06</text>
-          </g>
         </svg>
-          </div>
-          <figcaption><div><span class="caption-id">FIG. 01 / DIGITAL OBJECT</span><strong>Aperture</strong></div><button type="button" data-motion aria-pressed="false" hidden>Pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
-        </figure>
-      </section>
-      <section class="index" id="index" aria-labelledby="index-title">
-        <div class="section-header"><h2 id="index-title">Index<span>.</span></h2><span>01 — 02 / DIRECTORY</span></div>
-        <a class="entry" href="#artwork"><span class="entry-no">01</span><span class="entry-name">Aperture<small>光と形の実験</small></span><span class="entry-type">VISUAL STUDY</span><span class="entry-arrow">↗</span></a>
-        <a class="entry" href="https://github.com/Nlb0sl"><span class="entry-no">02</span><span class="entry-name">Source<small>コードと制作物</small></span><span class="entry-type">GITHUB</span><span class="entry-arrow">↗</span></a>
-      </section>
-    </main>
-    <footer class="footer"><span>nlb0sl / h0me.</span><span>BUILT FOR THE WEB</span><a href="#top" data-top>Back to top ↑</a></footer>
-  </div>
+      </div>
+      <figcaption>
+        <button type="button" data-motion aria-pressed="false" hidden>停止</button>
+      </figcaption>
+    </figure>
+  </main>
 </body>
 </html>
