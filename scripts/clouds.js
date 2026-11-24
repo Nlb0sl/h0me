@@ -2,7 +2,11 @@
 const canvas = document.querySelector(".clouds");
 if (canvas) {
   const ctx = canvas.getContext("2d", {alpha:true});
-  if (ctx) mount(canvas,ctx);
+  if (ctx) {
+    document.documentElement.dataset.cloudRenderer="canvas2d";
+    if(new URLSearchParams(location.search).get("clouds")==="raw")document.title="nlb0sl — Canvas fallback";
+    mount(canvas,ctx);
+  }
 }
 
 function mount(canvas,ctx) {

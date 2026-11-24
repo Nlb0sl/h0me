@@ -8,7 +8,8 @@ import { CloudsEffect, CLOUD_SHAPE_TEXTURE_SIZE, CLOUD_SHAPE_DETAIL_TEXTURE_SIZE
 import { DataTextureLoader, parseUint8Array, STBNLoader, DEFAULT_STBN_URL, Geodetic } from "@takram/three-geospatial";
 
 const fallback=document.querySelector(".clouds");
-if(fallback)start().catch(error=>console.warn("Volumetric clouds unavailable; using Canvas 2D.",error));
+const mode=new URLSearchParams(location.search).get("clouds");
+if(fallback&&mode!=="2d")start().catch(error=>console.warn("Volumetric clouds unavailable; using Canvas 2D.",error));
 
 async function start(){
   const renderer=new THREE.WebGLRenderer({antialias:false,alpha:false,depth:true,powerPreference:"low-power"});
@@ -23,6 +24,8 @@ async function start(){
     failed=true;cancelAnimationFrame(frame);
     view.remove();
     fallback.hidden=false;
+    document.documentElement.dataset.cloudRenderer="canvas2d";
+    if(mode==="raw")document.title="nlb0sl — Canvas fallback";
     document.dispatchEvent(new Event("clouds-fallback"));
     console.warn("Volumetric cloud rendering:",error);
   }
@@ -35,7 +38,7 @@ async function start(){
     const position=new Geodetic(0,0,180).toECEF();
     camera.position.copy(position);
     camera.up.set(1,0,0);
-    const direction=new THREE.Vector3(.48,1,0).normalize();
+    const direction=new THREE.Vector3(.32,1,0).normalize();
     camera.lookAt(position.clone().addScaledVector(direction,1000));
     const clouds=new CloudsEffect(camera);
     clouds.qualityPreset="medium";
@@ -46,23 +49,24 @@ async function start(){
     clouds.turbulence=true;
     clouds.cloudLayers[0].altitude=900;
     clouds.cloudLayers[0].height=650;
-    clouds.cloudLayers[0].densityScale=.13;
+    clouds.cloudLayers[0].densityScale=.10;
     clouds.cloudLayers[1].altitude=1400;
     clouds.cloudLayers[1].height=1000;
-    clouds.cloudLayers[1].densityScale=.12;
+    clouds.cloudLayers[1].densityScale=.10;
     clouds.cloudLayers[2].densityScale=.001;
-    clouds.shapeRepeat.set(.00022,.00030,.00022);
+    // At this ECEF location X is vertical; compress vertically, stretch horizontally.
+    clouds.shapeRepeat.set(.00034,.00024,.00024);
     clouds.cloudLayers[0].shapeDetailAmount=.55;
     clouds.cloudLayers[1].shapeDetailAmount=.65;
     clouds.turbulenceDisplacement*=.60;
-    clouds.clouds.maxIterationCountToSun=3;
+    clouds.clouds.maxIterationCountToSun=4;
     clouds.clouds.accurateSunSkyLight=true;
     clouds.lightShafts=false;
     clouds.haze=false;
     clouds.skipRendering=true;
     clouds.localWeatherVelocity.set(.00018,.00006);
     clouds.shapeVelocity.set(0,0,0);
-    clouds.sunDirection.set(.85,.18,.49).normalize();
+    clouds.sunDirection.set(.75,-.40,.53).normalize();
     // Use the upstream LUTs and 3D noise textures rather than an invented cloud field.
     const manager=new THREE.LoadingManager();
     const textureLoader=new THREE.TextureLoader(manager);
@@ -92,32 +96,45 @@ async function start(){
     const fragment=`
       uniform sampler2D cloudMap;
       uniform vec2 viewport;
+      uniform float rawMode;
       vec3 linearColor(vec3 c){return pow(c,vec3(2.2));}
+      vec3 softCloud(vec4 c){
+        float a=clamp(c.a,0.0,1.0);
+        float lum=dot(max(c.rgb,vec3(0.0)),vec3(.2126,.7152,.0722))/max(a,.025);
+        // Continuous luminance response with a lifted shadow floor.
+        float shade=pow(lum/(lum+.28),.64);
+        vec3 shadow=linearColor(vec3(.66,.70,.70));
+        vec3 light=linearColor(vec3(.99,.965,.91));
+        return mix(shadow,light,shade);
+      }
       void mainImage(const in vec4 inputColor,const in vec2 uv,out vec4 outputColor){
         vec3 sky=mix(linearColor(vec3(.675,.737,.718)),linearColor(vec3(.569,.651,.663)),uv.y);
+        vec4 cloud=texture2D(cloudMap,uv);
+        float a=clamp(cloud.a,0.0,1.0);
+        if(rawMode>.5){
+          // Diagnostic: original cloud radiance and opacity, no stipple or palette.
+          vec3 radiance=max(cloud.rgb,vec3(0.0))/max(a,.025);
+          vec3 mapped=vec3(1.0)-exp(-radiance*2.0);
+          outputColor=vec4(mix(sky,mapped,a),1.0);
+          return;
+        }
         vec2 p=uv*viewport;
         float pitch=3.8;
         float row=floor(p.y/pitch);
         vec2 shifted=p-vec2(mod(row,2.0)*pitch*.5,0.0);
         vec2 cell=(floor(shifted/pitch)+.5)*pitch;
         vec2 center=cell+vec2(mod(row,2.0)*pitch*.5,0.0);
-        vec4 cloud=texture2D(cloudMap,clamp(center/viewport,vec2(0.0),vec2(1.0)));
-        float opacity=clamp(cloud.a,0.0,1.0);
-        float lum=dot(max(cloud.rgb,vec3(0.0)),vec3(.2126,.7152,.0722))/max(opacity,.035);
-        float shade=pow(clamp(lum*4.0/(1.0+lum*4.0),0.0,1.0),.65);
-        float threshold=fract(sin(dot(center,vec2(12.9898,78.233)))*43758.5453);
-        shade=floor(shade*9.0+threshold)/9.0;
-        vec3 shadow=linearColor(vec3(.43,.52,.55));
-        vec3 middle=linearColor(vec3(.73,.75,.72));
-        vec3 light=linearColor(vec3(.985,.960,.895));
-        vec3 ink=mix(mix(shadow,middle,smoothstep(0.0,.6,shade)),light,smoothstep(.45,1.0,shade));
-        float radius=pitch*(.34+.12*shade)*pow(opacity,.72);
-        float mask=1.0-smoothstep(radius-.55,radius+.55,length(p-center));
-        mask*=smoothstep(.015,.32,opacity);
-        outputColor=vec4(mix(sky,ink,mask),1.0);
+        vec4 sampleCloud=texture2D(cloudMap,clamp(center/viewport,vec2(0.0),vec2(1.0)));
+        float opacity=clamp(sampleCloud.a,0.0,1.0);
+        // Keep a faint continuous scattering layer between the printed dots.
+        vec3 base=mix(sky,softCloud(cloud),a*.32);
+        float radius=pitch*.45*sqrt(opacity);
+        float mask=(1.0-smoothstep(radius-.45,radius+.45,length(p-center)))*opacity;
+        outputColor=vec4(mix(base,softCloud(sampleCloud),mask*.90),1.0);
       }`;
     const halftone=new Effect("CloudHalftone",fragment,{uniforms:new Map([
-      ["cloudMap",new THREE.Uniform(null)],["viewport",new THREE.Uniform(new THREE.Vector2(1,1))]
+      ["cloudMap",new THREE.Uniform(null)],["viewport",new THREE.Uniform(new THREE.Vector2(1,1))],
+      ["rawMode",new THREE.Uniform(mode==="raw"?1:0)]
     ])});
     // Read the current ping-pong output immediately before the halftone pass.
     halftone.update=()=>{
@@ -147,6 +164,8 @@ async function start(){
             ready=true;
             fallback.insertAdjacentElement("afterend",view);
             fallback.hidden=true;
+            document.documentElement.dataset.cloudRenderer="takram";
+            if(mode==="raw")document.title="nlb0sl — Takram raw clouds";
             document.dispatchEvent(new Event("clouds-volumetric-ready"));
           }
         }
