@@ -53,8 +53,9 @@ export async function mount(root) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.uniform1i(u.u_photo, 0);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
 
-  let ready = false;
+  let ready = config.requiresPhoto === false;
   let stopped = false;
   let frame = 0;
   let photoWidth = 1, photoHeight = 1;
@@ -116,8 +117,10 @@ export async function mount(root) {
     }
   }
 
-  image.addEventListener("load", uploadPhoto);
-  image.addEventListener("error", () => { ready = false; canvas.hidden = true; });
+  if (config.requiresPhoto !== false) {
+    image.addEventListener("load", uploadPhoto);
+    image.addEventListener("error", () => { ready = false; canvas.hidden = true; });
+  }
   const resize = new ResizeObserver(invalidate);
   resize.observe(root);
   root.addEventListener("pointermove", event => {
@@ -132,5 +135,6 @@ export async function mount(root) {
     cancelAnimationFrame(frame);
     canvas.hidden = true;
   });
-  uploadPhoto();
+  if (config.requiresPhoto === false) invalidate();
+  else uploadPhoto();
 }

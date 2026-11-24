@@ -1,6 +1,6 @@
 # h0me.
 
-履歴書風の静的プロフィールサイト。左上の写真は WebGL シェーダー付きスライドショー。HTML / CSS / ES Modules。ビルド・npm不要。
+履歴書風の静的プロフィールサイト。左上は WebGL で生成する nlb0sl のアバター。HTML / CSS / ES Modules。ビルド・npm不要。
 
 ## 編集とプレビュー
 
@@ -14,7 +14,7 @@ index.html の氏名・各項目・自己紹介を直接書き換える。`—` 
 styles/resume.css で履歴書の配置、styles/main.css で配色を変更。
 写真枠は aspect-ratio: 3 / 4。シェーダーは写真枠内だけに描画される。
 
-## 写真の追加
+## 写真のスライドショー（再利用用）
 
 1. assets/photos/ に JPG、PNG、WebP などを入れる。
 2. scripts/data/photos.js の photos に追加する。例:
@@ -33,8 +33,10 @@ styles/main.css の --photo-fit を contain にすると全体表示、cover に
 ## GLSL シェーダー
 
 WebGL 2 / GLSL ES 3.00 を使用。外部ライブラリ不要。
+現在のアバターは `shaders/nlb0sl.frag`。写真不要のプロシージャル描画。
+マウス位置で回転角が変化する。写真加工に戻すには `scripts/data/shader.js` の fragment を `photo.frag` にし、requiresPhoto を true にする。スライドショーを再利用する場合は HTML に slideshow コンポーネントと操作ボタンを戻す。
 `shaders/photo.frag` を編集すると、表示中の写真にエフェクトをかけられる。
-標準は薄いフィルムグレイン。Live Preview の再読み込みで反映する。
+photo.frag は薄いフィルムグレインの例。Live Preview の再読み込みで反映する。
 GLSL コンパイルエラーはブラウザの開発者ツールの Console で確認。
 GPU非対応・初期化失敗の場合は元のHTML画像が表示される。
 
