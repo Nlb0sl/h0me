@@ -3,53 +3,113 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>h0me.</title>
-  <link rel="stylesheet" href="./styles/main.css">
-  <script type="module" src="./scripts/main.js"></script>
+  <meta name="theme-color" content="#f3f2ee">
+  <meta name="description" content="nlb0sl — an independent personal space.">
+  <title>nlb0sl — h0me.</title>
+  <link rel="stylesheet" href="./styles/site.css?v=2">
+  <script type="module" src="./scripts/site.js?v=2"></script>
 </head>
-<body>
-  <main class="resume">
-    <header class="resume__heading">
-      <span>PERSONAL RECORD</span>
-      <span>h0me. / 001</span>
+<body id="top">
+  <div class="shell">
+    <header class="masthead">
+      <a class="wordmark" href="./">h0me<span>.</span></a>
+      <span class="masthead__index">INDEPENDENT<br>PERSONAL SPACE</span>
+      <nav aria-label="メインメニュー"><a href="#index">Index</a><a href="https://github.com/Nlb0sl">GitHub ↗</a></nav>
     </header>
-    <div class="identity">
-      <figure class="portrait slideshow" data-component="shader" aria-label="nlb0sl の生成アバター">
-        <img class="slideshow__image" src="./assets/photos/mouth-rest.svg" alt="音声に反応する口のグラフィック" draggable="false" fetchpriority="high">
-        <canvas class="shader-canvas" aria-hidden="true" hidden></canvas>
-      </figure>
-      <section class="identity__details" aria-labelledby="name">
-        <div class="identity__name">
-          <span class="field-label">氏名 / NAME</span>
-          <h1 id="name">nlb0sl</h1>
+    <main>
+      <section class="hero" aria-labelledby="identity">
+        <div class="intro">
+          <div class="eyebrow"><span class="dot"></span> PERSONAL INDEX / 000</div>
+          <h1 id="identity">nlb0sl<span>.</span></h1>
+          <p class="intro__jp">まだ名前のついていないものを、<br>置いておく場所。</p>
+          <p class="intro__en">A place for things<br>that do not have a name yet.</p>
+          <a class="index-link" href="#index"><span>EXPLORE THE INDEX</span><span aria-hidden="true">↓</span></a>
         </div>
-        <dl class="fields">
-          <div><dt>肩書き / ROLE</dt><dd>—</dd></div>
-          <div><dt>所在地 / LOCATION</dt><dd>—</dd></div>
-          <div><dt>リンク / LINKS</dt><dd><a href="https://github.com/Nlb0sl">GitHub ↗</a></dd></div>
-        </dl>
-        <div class="voice-controls" data-component="voice">
-          <button type="button" data-screen>共有音声</button>
-          <button type="button" data-mic>マイク</button>
-          <button type="button" data-stop disabled>停止</button>
-          <button type="button" data-test>TEST</button>
-          <output data-voice-status aria-live="polite">OFF</output>
-        </div>
+        <figure class="exhibit" id="artwork">
+          <div class="exhibit__frame" data-artwork>
+            <svg class="artwork" viewBox="0 0 480 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="art-title art-desc">
+          <title id="art-title">Aperture — 0の輪郭を横切る光</title>
+          <desc id="art-desc">黒い背景に切り分けられた楕円形の輪が浮かび、細い光が静かに移動する。</desc>
+          <defs>
+            <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="#535b5a"/><stop offset=".36" stop-color="#f0f1e9"/><stop offset=".64" stop-color="#89918e"/><stop offset="1" stop-color="#272d2d"/>
+            </linearGradient>
+            <linearGradient id="light" x1="0" y1="0" x2="1" y2=".2">
+              <stop stop-color="#f8faf4" stop-opacity="0"/><stop offset=".48" stop-color="#f8faf4" stop-opacity=".88"/><stop offset=".55" stop-color="#f8faf4" stop-opacity=".96"/><stop offset="1" stop-color="#f8faf4" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="aperture"><path fill-rule="evenodd" clip-rule="evenodd" d="M240 43 C334 43 386 115 386 220 S334 397 240 397 S94 325 94 220 S146 43 240 43Z M240 112 C191 112 174 158 174 220 S191 328 240 328 S306 282 306 220 S289 112 240 112Z"/></clipPath>
+            <mask id="blades" maskUnits="userSpaceOnUse" x="0" y="0" width="480" height="440">
+              <rect width="480" height="440" fill="black"/>
+              <g clip-path="url(#aperture)" stroke="white" fill="none">
+              <path d="M50 43 L430 -17" stroke-width="3.4"/>
+              <path d="M50 53 L430 -7" stroke-width="6.3"/>
+              <path d="M50 63 L430 3" stroke-width="6.3"/>
+              <path d="M50 73 L430 13" stroke-width="6.3"/>
+              <path d="M50 83 L430 23" stroke-width="6.3"/>
+              <path d="M50 93 L430 33" stroke-width="6.3"/>
+              <path d="M50 103 L430 43" stroke-width="3.4"/>
+              <path d="M50 113 L430 53" stroke-width="6.3"/>
+              <path d="M50 123 L430 63" stroke-width="6.3"/>
+              <path d="M50 133 L430 73" stroke-width="6.3"/>
+              <path d="M50 143 L430 83" stroke-width="6.3"/>
+              <path d="M50 153 L430 93" stroke-width="6.3"/>
+              <path d="M50 163 L430 103" stroke-width="3.4"/>
+              <path d="M50 173 L430 113" stroke-width="6.3"/>
+              <path d="M50 183 L430 123" stroke-width="6.3"/>
+              <path d="M50 193 L430 133" stroke-width="6.3"/>
+              <path d="M50 203 L430 143" stroke-width="6.3"/>
+              <path d="M50 213 L430 153" stroke-width="6.3"/>
+              <path d="M50 223 L430 163" stroke-width="3.4"/>
+              <path d="M50 233 L430 173" stroke-width="6.3"/>
+              <path d="M50 243 L430 183" stroke-width="6.3"/>
+              <path d="M50 253 L430 193" stroke-width="6.3"/>
+              <path d="M50 263 L430 203" stroke-width="6.3"/>
+              <path d="M50 273 L430 213" stroke-width="6.3"/>
+              <path d="M50 283 L430 223" stroke-width="3.4"/>
+              <path d="M50 293 L430 233" stroke-width="6.3"/>
+              <path d="M50 303 L430 243" stroke-width="6.3"/>
+              <path d="M50 313 L430 253" stroke-width="6.3"/>
+              <path d="M50 323 L430 263" stroke-width="6.3"/>
+              <path d="M50 333 L430 273" stroke-width="6.3"/>
+              <path d="M50 343 L430 283" stroke-width="3.4"/>
+              <path d="M50 353 L430 293" stroke-width="6.3"/>
+              <path d="M50 363 L430 303" stroke-width="6.3"/>
+              <path d="M50 373 L430 313" stroke-width="6.3"/>
+              <path d="M50 383 L430 323" stroke-width="6.3"/>
+              <path d="M50 393 L430 333" stroke-width="6.3"/>
+              <path d="M50 403 L430 343" stroke-width="3.4"/>
+              </g>
+            </mask>
+          </defs>
+          <rect width="480" height="440" fill="#151919"/>
+          <g stroke="#d8dfd8" stroke-width=".65" opacity=".17" fill="none">
+            <path d="M32 220H448 M240 24V416"/>
+            <path d="M32 42V24H50 M430 24H448V42 M32 398V416H50 M430 416H448V398"/>
+            <circle cx="240" cy="220" r="189" stroke-dasharray="1 7"/>
+          </g>
+          <g class="art-body">
+            <g mask="url(#blades)">
+              <rect width="480" height="440" fill="url(#base)"/>
+              <g class="light-sweep"><rect x="-190" y="-30" width="190" height="500" fill="url(#light)" transform="rotate(-13 0 220)"/></g>
+              <g class="pointer-light"><rect x="-85" y="-40" width="170" height="520" fill="url(#light)" opacity=".45"/></g>
+            </g>
+          </g>
+          <g fill="#aeb7b1" font-family="monospace" font-size="8" letter-spacing="1">
+            <text x="32" y="16">OBJECT / 000</text><text x="448" y="16" text-anchor="end">NLB0SL</text>
+            <text x="32" y="433">VISIBLE SPECTRUM</text><text x="448" y="433" text-anchor="end">01 — 06</text>
+          </g>
+        </svg>
+          </div>
+          <figcaption><div><span class="caption-id">FIG. 01 / DIGITAL OBJECT</span><strong>Aperture</strong></div><button type="button" data-motion aria-pressed="false" hidden>Pause <span aria-hidden="true">Ⅱ</span></button></figcaption>
+        </figure>
       </section>
-    </div>
-    <section class="record">
-      <h2>自己紹介 <span>ABOUT</span></h2>
-      <div class="record__body">
-        <p>—</p>
-      </div>
-    </section>
-    <section class="record">
-      <h2>興味・活動 <span>INTERESTS</span></h2>
-      <div class="record__body">
-        <p>—</p>
-      </div>
-    </section>
-    <footer class="resume__footer"><span>PERSONAL WEBSITE</span><span><a href="./THIRD_PARTY_NOTICES.md">OSS LICENSES</a> · 01 / 01</span></footer>
-  </main>
+      <section class="index" id="index" aria-labelledby="index-title">
+        <div class="section-header"><h2 id="index-title">Index<span>.</span></h2><span>01 — 02 / DIRECTORY</span></div>
+        <a class="entry" href="#artwork"><span class="entry-no">01</span><span class="entry-name">Aperture<small>光と形の実験</small></span><span class="entry-type">VISUAL STUDY</span><span class="entry-arrow">↗</span></a>
+        <a class="entry" href="https://github.com/Nlb0sl"><span class="entry-no">02</span><span class="entry-name">Source<small>コードと制作物</small></span><span class="entry-type">GITHUB</span><span class="entry-arrow">↗</span></a>
+      </section>
+    </main>
+    <footer class="footer"><span>nlb0sl / h0me.</span><span>BUILT FOR THE WEB</span><a href="#top" data-top>Back to top ↑</a></footer>
+  </div>
 </body>
 </html>
