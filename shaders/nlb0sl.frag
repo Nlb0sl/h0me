@@ -54,11 +54,13 @@ float signature(vec2 p) {
 // One three-dimensional specimen, six sequential identities.
 const float HOLD = 1.25;
 const float MORPH = 2.15;
-const float THICKNESS = .118;
-const float WOBBLE = .095;
+const float THICKNESS = .108;
+const float DEPTH = .052;
+const float BEVEL = .020;
+const float WOBBLE = .065;
 const int STEPS = 28;
 vec3 nodes[STEPS + 1];
-float radii[STEPS];
+
 
 vec2 bezier(vec2 a, vec2 b, vec2 c, vec2 d, float t) {
     vec2 ab = mix(a,b,t);
@@ -121,16 +123,12 @@ void prepareMorph(float t) {
         // Spatial waves keep closed loops joined. Surface motion is
         // intentionally subdued when a readable letter is held.
         vec2 original = xy;
-        float wobble = .022 + WOBBLE * energy;
+        float wobble = .009 + WOBBLE * energy;
         xy += wobble * vec2(
             sin(original.y*9.0 + original.x*4.0 - t*1.8),
             cos(original.x*8.0 - original.y*5.0 + t*1.5));
-        float z = (.047 + .09*energy)*sin(original.x*8.0 + original.y*7.0 + t*1.4);
+        float z = (.008 + .055*energy)*sin(original.x*5.0 + original.y*4.0 + t*1.4);
         nodes[i] = vec3(xy,z);
-    }
-    for (int i=0; i<STEPS; ++i) {
-        vec3 midpoint = (nodes[i]+nodes[i+1])*.5;
-        radii[i] = THICKNESS + (.019+.018*energy)*sin(midpoint.x*10.0-midpoint.y*8.0-t*1.25);
     }
 }
 
@@ -146,14 +144,18 @@ vec3 objectSpace(vec3 p, float t) {
 }
 float field(vec3 p,float t) {
     p=objectSpace(p,t);
-    // A union of rounded 3D capsules along one continuous changing path.
-    // No separate letters or detached core.
+    // A continuous flat ribbon with a machined, softly beveled edge.
+    // Width and depth are independent, unlike the old tubular specimen.
     float d=10.0;
     for(int i=0;i<STEPS;++i) {
         vec3 a=nodes[i], b=nodes[i+1];
-        vec3 v=b-a;
-        float u=clamp(dot(p-a,v)/max(dot(v,v),.000001),0.0,1.0);
-        d=min(d,length(p-a-v*u)-radii[i]);
+        vec2 v=b.xy-a.xy;
+        float u=clamp(dot(p.xy-a.xy,v)/max(dot(v,v),.000001),0.0,1.0);
+        vec3 c=mix(a,b,u);
+        vec2 w=vec2(length(p.xy-c.xy)-(THICKNESS-BEVEL),
+                    abs(p.z-c.z)-(DEPTH-BEVEL));
+        float slab=length(max(w,0.0))+min(max(w.x,w.y),0.0)-BEVEL;
+        d=min(d,slab);
     }
     return d;
 }
@@ -205,19 +207,21 @@ void main() {
         point = ro + rd * travel;
         float d = field(point, t);
         if (d < 0.0018) { hit = true; break; }
-        travel += max(d * 0.85, 0.001);
+        travel += max(d * 0.72, 0.001);
         if (travel > 5.0) break;
     }
     if (hit) {
         vec3 n = normalAt(point, t);
         float diffuse = max(dot(n, normalize(vec3(-0.6, 0.8, 0.9))), 0.0);
         float rim = pow(1.0 - max(dot(n, -rd), 0.0), 2.0);
-        vec3 obj = objectSpace(point, t);
-        float bands = 0.5 + 0.5 * sin(obj.y * 54.0 + obj.x * 9.0 + t * 0.9);
-        float luminance = clamp(0.12 + diffuse * 0.67 + rim * 0.22 - bands * 0.09, 0.0, 1.0);
+        // Satin ceramic / anodized metal: broad planes, precise edges.
+        vec3 lightDir = normalize(vec3(-0.6, 0.8, 0.9));
+        vec3 halfDir = normalize(lightDir - rd);
+        float specular = pow(max(dot(n, halfDir), 0.0), 24.0);
+        float luminance = clamp(0.20 + diffuse * 0.47 + rim * 0.12 + specular * 0.28, 0.0, 0.94);
         // Quantized, printed shading.
         float noise = hash(floor(gl_FragCoord.xy));
-        luminance = floor(luminance * 5.0 + noise) / 5.0;
+        luminance = floor(luminance * 9.0 + noise) / 9.0;
         color = mix(ink, paper, luminance);
     }
 
@@ -234,6 +238,6 @@ void main() {
     vec2 textCell = vec2((f.x - 0.29) * 35.0 / 0.42, (f.y - 0.075) * 35.0 / 0.42 * u_resolution.y / u_resolution.x);
     color = mix(color, ink, signature(textCell));
     float grain = hash(floor(gl_FragCoord.xy) + floor(t * 8.0) * 7.0) - 0.5;
-    color += grain * 0.055;
+    color += grain * 0.035;
     fragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
 }
