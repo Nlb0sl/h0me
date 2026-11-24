@@ -58,16 +58,16 @@ function mount(canvas,ctx) {
       }
     }
     function field(u,v){
-      const wx=u+.075*(fbm(u*5+11,v*5,seed)-.5);
-      const wy=v+.095*(fbm(u*6,v*5+17,seed+1)-.5);
+      const wx=u+.060*(fbm(u*5+11,v*5,seed)-.5);
+      const wy=v+.075*(fbm(u*6,v*5+17,seed+1)-.5);
       let density=0;
       for(const [x,y,rx,ry] of lobes){
         const dx=(wx-x)/rx,dy=(wy-y)/ry;
         const q=Math.max(0,1-(dx*dx+dy*dy)*.46);
         density+=q*q;
       }
-      const turbulence=.85*(fbm(u*12,v*10,seed+2)-.5)
-        +.36*(fbm(u*33,v*25,seed+3)-.5);
+      const turbulence=.66*(fbm(u*12,v*10,seed+2)-.5)
+        +.23*(fbm(u*33,v*25,seed+3)-.5);
       const border=smooth(0,.07,u)*smooth(0,.07,1-u)*smooth(0,.07,v)*smooth(0,.09,1-v);
       return (density+turbulence)*border-.48;
     }
@@ -101,7 +101,7 @@ function mount(canvas,ctx) {
   }
   function newCloud(layer,x){
     const w=Math.round(layer.scale*random(.78,1.30));
-    const h=Math.round(w*random(.44,.64));
+    const h=Math.round(w*random(.47,.66));
     const y=height*layer.level-h*random(.43,.67);
     return {sprite:makeCloud(w,h,layer),w,h,x,y};
   }
