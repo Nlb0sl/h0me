@@ -33,8 +33,7 @@ styles/main.css の --photo-fit を contain にすると全体表示、cover に
 ## GLSL シェーダー
 
 WebGL 2 / GLSL ES 3.00 を使用。外部ライブラリ不要。
-現在のアバターは `shaders/nlb0sl.frag`。写真不要のプロシージャル描画。
-マウス位置で回転角が変化する。写真加工に戻すには `scripts/data/shader.js` の fragment を `photo.frag` にし、requiresPhoto を true にする。スライドショーを再利用する場合は HTML に slideshow コンポーネントと操作ボタンを戻す。
+現在のアバターは `shaders/nlb0sl.frag`。SVGの文字輪郭をテクスチャマスクとして使い、内部に光学的な線を描画する。写真加工に戻すには `scripts/data/shader.js` の fragment を `photo.frag` にし、requiresPhoto を true にする。スライドショーを再利用する場合は HTML に slideshow コンポーネントと操作ボタンを戻す。
 `shaders/photo.frag` を編集すると、表示中の写真にエフェクトをかけられる。
 photo.frag は薄いフィルムグレインの例。Live Preview の再読み込みで反映する。
 GLSL コンパイルエラーはブラウザの開発者ツールの Console で確認。
