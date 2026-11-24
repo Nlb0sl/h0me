@@ -11,7 +11,7 @@ const fallback=document.querySelector(".clouds");
 if(fallback)start().catch(error=>console.warn("Volumetric clouds unavailable; using Canvas 2D.",error));
 
 async function start(){
-  const renderer=new THREE.WebGLRenderer({antialias:false,alpha:false,depth:false,powerPreference:"low-power"});
+  const renderer=new THREE.WebGLRenderer({antialias:false,alpha:false,depth:true,powerPreference:"low-power"});
   renderer.setPixelRatio(1);
   renderer.toneMapping=THREE.NoToneMapping;
   const view=renderer.domElement;
@@ -31,22 +31,34 @@ async function start(){
   try{
     const scene=new THREE.Scene();
     scene.background=new THREE.Color(0);
-    const camera=new THREE.PerspectiveCamera(65,1,10,1e6);
-    const position=new Geodetic(0,0,100).toECEF();
+    const camera=new THREE.PerspectiveCamera(53,1,10,1e6);
+    const position=new Geodetic(0,0,180).toECEF();
     camera.position.copy(position);
     camera.up.set(1,0,0);
-    const direction=new THREE.Vector3(.75,1,0).normalize();
+    const direction=new THREE.Vector3(.48,1,0).normalize();
     camera.lookAt(position.clone().addScaledVector(direction,1000));
     const clouds=new CloudsEffect(camera);
     clouds.qualityPreset="medium";
-    clouds.resolutionScale=.55;
-    clouds.coverage=.62;
+    clouds.resolutionScale=.85;
+    clouds.temporalUpscale=false;
+    clouds.coverage=.58;
+    clouds.shapeDetail=true;
+    clouds.turbulence=true;
+    clouds.cloudLayers[0].altitude=900;
+    clouds.cloudLayers[0].height=950;
+    clouds.cloudLayers[0].densityScale=.17;
+    clouds.cloudLayers[1].altitude=1400;
+    clouds.cloudLayers[1].height=1800;
+    clouds.cloudLayers[1].densityScale=.16;
+    clouds.cloudLayers[2].densityScale=.001;
+    clouds.clouds.maxIterationCountToSun=3;
+    clouds.clouds.accurateSunSkyLight=true;
     clouds.lightShafts=false;
     clouds.haze=false;
     clouds.skipRendering=true;
-    clouds.localWeatherVelocity.set(.00045,.00013);
-    clouds.shapeVelocity.set(8,3,0);
-    clouds.sunDirection.set(.82,-.25,.51).normalize();
+    clouds.localWeatherVelocity.set(.00018,.00006);
+    clouds.shapeVelocity.set(0,0,0);
+    clouds.sunDirection.set(.63,-.28,.72).normalize();
     // Use the upstream LUTs and 3D noise textures rather than an invented cloud field.
     const manager=new THREE.LoadingManager();
     const textureLoader=new THREE.TextureLoader(manager);
@@ -88,23 +100,24 @@ async function start(){
         vec4 cloud=texture2D(cloudMap,clamp(center/viewport,vec2(0.0),vec2(1.0)));
         float opacity=clamp(cloud.a,0.0,1.0);
         float lum=dot(max(cloud.rgb,vec3(0.0)),vec3(.2126,.7152,.0722))/max(opacity,.035);
-        float shade=clamp(1.0-exp(-lum*6.0),0.0,1.0);
-        shade=floor(shade*8.0+.5)/8.0;
+        float shade=pow(clamp(lum*3.0/(1.0+lum*3.0),0.0,1.0),.85);
+        shade=floor(shade*6.0+.5)/6.0;
         vec3 shadow=linearColor(vec3(.286,.373,.439));
         vec3 middle=linearColor(vec3(.659,.706,.682));
         vec3 light=linearColor(vec3(.965,.910,.808));
         vec3 ink=mix(mix(shadow,middle,smoothstep(0.0,.6,shade)),light,smoothstep(.45,1.0,shade));
-        float radius=pitch*(.32+.17*shade)*sqrt(opacity);
+        float radius=pitch*(.37+.09*shade)*sqrt(opacity);
         float mask=1.0-smoothstep(radius-.55,radius+.55,length(p-center));
-        mask*=smoothstep(.018,.16,opacity);
+        mask*=smoothstep(.025,.25,opacity);
         outputColor=vec4(mix(sky,ink,mask),1.0);
       }`;
     const halftone=new Effect("CloudHalftone",fragment,{uniforms:new Map([
       ["cloudMap",new THREE.Uniform(null)],["viewport",new THREE.Uniform(new THREE.Vector2(1,1))]
     ])});
-    clouds.events.addEventListener("change",event=>{
-      if(event.property==="atmosphereOverlay")halftone.uniforms.get("cloudMap").value=clouds.atmosphereOverlay?.map??null;
-    });
+    // Read the current ping-pong output immediately before the halftone pass.
+    halftone.update=()=>{
+      halftone.uniforms.get("cloudMap").value=clouds.cloudsPass.outputBuffer;
+    };
     composer=new EffectComposer(renderer,{frameBufferType:THREE.HalfFloatType,multisampling:0});
     composer.addPass(new RenderPass(scene,camera));
     composer.addPass(new EffectPass(camera,clouds));
@@ -125,8 +138,6 @@ async function start(){
         const dt=last?Math.min(.1,(now-last)/1000):0;last=now;
         composer.render(dt);
         if(!failed&&clouds.atmosphereOverlay?.map){
-          // The ping-pong buffer may change after each temporal resolve.
-          halftone.uniforms.get("cloudMap").value=clouds.atmosphereOverlay.map;
           if(!ready){
             ready=true;
             fallback.insertAdjacentElement("afterend",view);
