@@ -118,7 +118,7 @@ void main() {
     vec3 light=normalize(vec3(-cos(angle),sin(angle),.58));
     float sweep=sin(point.x*.52+point.y*.38-t*.38);
     float spot=.22+.78*smoothstep(-.72,.78,sweep);
-    float cast=shadow(point+n*.018,light,t);
+    float castShadow=shadow(point+n*.018,light,t);
     float diffuse=max(dot(n,light),0.);
     float gloss=pow(max(dot(n,normalize(light-rd)),0.),38.);
     float rim=pow(1.-max(dot(n,-rd),0.),3.);
@@ -128,11 +128,11 @@ void main() {
     vec3 color;
     if(hit) {
         // Satin graphite / silver. No organic surface patterns.
-        vec3 metal=mix(dark,vec3(.74,.77,.73),.26+.57*diffuse*cast*spot);
-        color=metal+vec3(.28,.31,.30)*(gloss*spot*cast+.15*rim);
+        vec3 metal=mix(dark,vec3(.74,.77,.73),.26+.57*diffuse*castShadow*spot);
+        color=metal+vec3(.28,.31,.30)*(gloss*spot*castShadow+.15*rim);
     } else {
         float base=.55+.38*spot;
-        color=paper*base*mix(.53,1.,cast);
+        color=paper*base*mix(.53,1.,castShadow);
         // Very quiet grid printed beneath the type.
         vec2 cell=abs(fract(point.xy/PITCH)-.5);
         float grid=1.-smoothstep(.007,.018,min(.5-cell.x,.5-cell.y));
