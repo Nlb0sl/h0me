@@ -16,65 +16,12 @@ a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .masthead h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.045em; }
 .masthead nav { font-size: 13px; }
 .exhibit { width: min(100%, 480px); margin: clamp(32px, 8vw, 96px) auto; }
-.exhibit__frame {
-  background: #151919;
-  overflow: hidden;
-  aspect-ratio: 480 / 440;
-}
-.artwork {
-  width: 100%;
-  height: 100%;
-  container-type: inline-size;
-  display: grid;
-}
-.glyph-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  perspective: 1000px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 200px;
-  font-size: clamp(116px, 54cqw, 258px);
-  font-weight: 700;
-  line-height: 1;
-}
-.glyph {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  transform-origin: center;
-  --offset: -.035em;
-  animation: turn 24s linear infinite, select-glyph 24s steps(1, end) infinite;
-  animation-delay: var(--delay);
-}
-.glyph--short { --offset: -.12em; }
-.glyph--number { --offset: -.025em; }
-.glyph__slice {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #898d88;
-  -webkit-text-stroke: .55px #898d88;
-  transform: translateY(var(--offset)) translateZ(calc(var(--z) * .003em));
-}
-.glyph__face {
-  color: #e2e3dc;
-  -webkit-text-stroke: 0;
-}
-@keyframes turn {
-  0% { transform: rotateY(-90deg); }
-  16.6666667%, 100% { transform: rotateY(90deg); }
-}
-@keyframes select-glyph {
-  0% { visibility: visible; }
-  16.6666667%, 100% { visibility: hidden; }
-}
+.exhibit__frame { background: #202222; overflow: hidden; aspect-ratio: 480 / 440; }
+.artwork { position: relative; width: 100%; height: 100%; }
+.artwork__fallback, .artwork canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
+.artwork canvas { position: absolute; inset: 0; }
+.artwork canvas[hidden] { display: none; }
 @media(max-width: 480px) {
   .shell { width: calc(100% - 32px); }
   .masthead { padding-top: 22px; }
-}
-@media(prefers-reduced-motion: reduce) {
-  .glyph { animation: none; visibility: hidden; }
-  .glyph:first-child { visibility: visible; transform: rotateY(0deg); }
 }
