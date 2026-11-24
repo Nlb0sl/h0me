@@ -1,3 +1,4 @@
+import { mouthWeights } from "../audio/state.js";
 import { shaderConfig as config } from "../data/shader.js";
 
 async function source(url) {
@@ -42,7 +43,7 @@ export async function mount(root) {
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
   const uniform = name => gl.getUniformLocation(program, name);
-  const u = Object.fromEntries(["u_photo", "u_resolution", "u_photoResolution", "u_mouse", "u_time", "u_fit"].map(name => [name, uniform(name)]));
+  const u = Object.fromEntries(["u_photo", "u_resolution", "u_photoResolution", "u_mouse", "u_time", "u_fit", "u_aiueo[0]"].map(name => [name, uniform(name)]));
 
   const texture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
@@ -83,9 +84,10 @@ export async function mount(root) {
     gl.uniform2f(u.u_mouse, ...mouse);
     gl.uniform1f(u.u_time, reduced.matches ? 0 : (now - start) / 1000);
     gl.uniform1i(u.u_fit, getComputedStyle(image).objectFit === "contain" ? 1 : 0);
+    gl.uniform1fv(u["u_aiueo[0]"], mouthWeights(now));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     canvas.hidden = false;
-    if (config.animated && !reduced.matches) invalidate();
+    if (config.animated) invalidate();
   }
 
   function uploadPhoto() {

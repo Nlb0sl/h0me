@@ -1,5 +1,6 @@
 const components = {
   slideshow: () => import("./components/slideshow.js"),
+  voice: () => import("./components/voice.js"),
   shader: () => import("./components/shader.js"),
 };
 

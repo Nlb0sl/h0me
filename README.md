@@ -60,3 +60,7 @@ git add .
 git commit -m "Update photos"
 git push
 ```
+
+## Voice portrait
+
+Choose 共有音声 and select a tab/screen with audio sharing enabled, or choose マイク. 停止 releases all capture tracks. TEST cycles through the five mouth shapes without capturing audio or loading dependencies. Requires HTTPS or localhost. Browser/OS determines supported screen audio sources. No audio playback, storage or upload. VAD gates speech frames but does not isolate simultaneous music or other voices; LPC vowel estimates are approximate. Adjust prototypes and thresholds in scripts/audio/vowels.js. GLSL uniform u_aiueo[5] is in A,I,U,E,O order. Dependencies are loaded on demand with pinned versions; see THIRD_PARTY_NOTICES.md.

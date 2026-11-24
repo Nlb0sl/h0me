@@ -15,7 +15,7 @@
     </header>
     <div class="identity">
       <figure class="portrait slideshow" data-component="shader" aria-label="nlb0sl の生成アバター">
-        <img class="slideshow__image" src="./assets/photos/nlb0sl-fallback.svg" alt="nlb0sl の抽象的なアバター" draggable="false" fetchpriority="high">
+        <img class="slideshow__image" src="./assets/photos/mouth-rest.svg" alt="音声に反応する口のグラフィック" draggable="false" fetchpriority="high">
         <canvas class="shader-canvas" aria-hidden="true" hidden></canvas>
       </figure>
       <section class="identity__details" aria-labelledby="name">
@@ -28,6 +28,13 @@
           <div><dt>所在地 / LOCATION</dt><dd>—</dd></div>
           <div><dt>リンク / LINKS</dt><dd><a href="https://github.com/Nlb0sl">GitHub ↗</a></dd></div>
         </dl>
+        <div class="voice-controls" data-component="voice">
+          <button type="button" data-screen>共有音声</button>
+          <button type="button" data-mic>マイク</button>
+          <button type="button" data-stop disabled>停止</button>
+          <button type="button" data-test>TEST</button>
+          <output data-voice-status aria-live="polite">OFF</output>
+        </div>
       </section>
     </div>
     <section class="record">
@@ -42,7 +49,7 @@
         <p>—</p>
       </div>
     </section>
-    <footer class="resume__footer"><span>PERSONAL WEBSITE</span><span>01 / 01</span></footer>
+    <footer class="resume__footer"><span>PERSONAL WEBSITE</span><span><a href="./THIRD_PARTY_NOTICES.md">OSS LICENSES</a> · 01 / 01</span></footer>
   </main>
 </body>
 </html>

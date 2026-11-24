@@ -66,3 +66,8 @@ h1 { margin: 4px 0 0; font-size: clamp(28px, 5vw, 48px); line-height: 1.15; lett
   .resume { width: 100%; margin: 0; border: 0; }
   .slideshow__button { display: none; }
 }
+
+.voice-controls { display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:10px; font:11px/1.4 var(--mono); }
+.voice-controls button { border:1px solid var(--rule); background:transparent; color:var(--ink); padding:4px 7px; font:inherit; cursor:pointer; }
+.voice-controls button:disabled { opacity:.35; cursor:default; }
+.voice-controls output { color:var(--muted); flex-basis:100%; overflow-wrap:anywhere; }
