@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f2ee">
   <title>nlb0sl</title>
-  <link rel="stylesheet" href="./styles/site.css?v=4">
+  <link rel="stylesheet" href="./styles/site.css?v=5">
 </head>
 <body>
   <main class="shell">
@@ -15,73 +15,24 @@
     </header>
     <figure class="exhibit">
       <div class="exhibit__frame">
-        <svg class="artwork" viewBox="0 0 480 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="art-title art-desc">
-          <title id="art-title">光の輪</title>
-          <desc id="art-desc">黒い背景に切り分けられた楕円形の輪が浮かび、細い光が静かに移動する。</desc>
-          <defs>
-            <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
-              <stop stop-color="#535b5a"/><stop offset=".36" stop-color="#f0f1e9"/><stop offset=".64" stop-color="#89918e"/><stop offset="1" stop-color="#272d2d"/>
-            </linearGradient>
-            <linearGradient id="light" x1="0" y1="0" x2="1" y2=".2">
-              <stop stop-color="#f8faf4" stop-opacity="0"/><stop offset=".48" stop-color="#f8faf4" stop-opacity=".88"/><stop offset=".55" stop-color="#f8faf4" stop-opacity=".96"/><stop offset="1" stop-color="#f8faf4" stop-opacity="0"/>
-            </linearGradient>
-            <clipPath id="aperture"><path fill-rule="evenodd" clip-rule="evenodd" d="M240 43 C334 43 386 115 386 220 S334 397 240 397 S94 325 94 220 S146 43 240 43Z M240 112 C191 112 174 158 174 220 S191 328 240 328 S306 282 306 220 S289 112 240 112Z"/></clipPath>
-            <mask id="blades" maskUnits="userSpaceOnUse" x="0" y="0" width="480" height="440">
-              <rect width="480" height="440" fill="black"/>
-              <g clip-path="url(#aperture)" stroke="white" fill="none">
-              <path d="M50 43 L430 -17" stroke-width="3.4"/>
-              <path d="M50 53 L430 -7" stroke-width="6.3"/>
-              <path d="M50 63 L430 3" stroke-width="6.3"/>
-              <path d="M50 73 L430 13" stroke-width="6.3"/>
-              <path d="M50 83 L430 23" stroke-width="6.3"/>
-              <path d="M50 93 L430 33" stroke-width="6.3"/>
-              <path d="M50 103 L430 43" stroke-width="3.4"/>
-              <path d="M50 113 L430 53" stroke-width="6.3"/>
-              <path d="M50 123 L430 63" stroke-width="6.3"/>
-              <path d="M50 133 L430 73" stroke-width="6.3"/>
-              <path d="M50 143 L430 83" stroke-width="6.3"/>
-              <path d="M50 153 L430 93" stroke-width="6.3"/>
-              <path d="M50 163 L430 103" stroke-width="3.4"/>
-              <path d="M50 173 L430 113" stroke-width="6.3"/>
-              <path d="M50 183 L430 123" stroke-width="6.3"/>
-              <path d="M50 193 L430 133" stroke-width="6.3"/>
-              <path d="M50 203 L430 143" stroke-width="6.3"/>
-              <path d="M50 213 L430 153" stroke-width="6.3"/>
-              <path d="M50 223 L430 163" stroke-width="3.4"/>
-              <path d="M50 233 L430 173" stroke-width="6.3"/>
-              <path d="M50 243 L430 183" stroke-width="6.3"/>
-              <path d="M50 253 L430 193" stroke-width="6.3"/>
-              <path d="M50 263 L430 203" stroke-width="6.3"/>
-              <path d="M50 273 L430 213" stroke-width="6.3"/>
-              <path d="M50 283 L430 223" stroke-width="3.4"/>
-              <path d="M50 293 L430 233" stroke-width="6.3"/>
-              <path d="M50 303 L430 243" stroke-width="6.3"/>
-              <path d="M50 313 L430 253" stroke-width="6.3"/>
-              <path d="M50 323 L430 263" stroke-width="6.3"/>
-              <path d="M50 333 L430 273" stroke-width="6.3"/>
-              <path d="M50 343 L430 283" stroke-width="3.4"/>
-              <path d="M50 353 L430 293" stroke-width="6.3"/>
-              <path d="M50 363 L430 303" stroke-width="6.3"/>
-              <path d="M50 373 L430 313" stroke-width="6.3"/>
-              <path d="M50 383 L430 323" stroke-width="6.3"/>
-              <path d="M50 393 L430 333" stroke-width="6.3"/>
-              <path d="M50 403 L430 343" stroke-width="3.4"/>
-              </g>
-            </mask>
-          </defs>
-          <rect width="480" height="440" fill="#151919"/>
-          <g stroke="#d8dfd8" stroke-width=".65" opacity=".17" fill="none">
-            <path d="M32 220H448 M240 24V416"/>
-            <path d="M32 42V24H50 M430 24H448V42 M32 398V416H50 M430 416H448V398"/>
-            <circle cx="240" cy="220" r="189" stroke-dasharray="1 7"/>
-          </g>
-          <g class="art-body">
-            <g mask="url(#blades)">
-              <rect width="480" height="440" fill="url(#base)"/>
-              <g class="light-sweep"><rect x="-190" y="-30" width="190" height="500" fill="url(#light)" transform="rotate(-13 0 220)"/></g>
-            </g>
-          </g>
-        </svg>
+        <div class="artwork" role="img" aria-label="回転するリングと順番に明るくなる n l b 0 s l の文字">
+          <div class="assembly" aria-hidden="true">
+            <div class="rotor">
+              <div class="rotor__outer"></div>
+              <div class="rotor__middle"></div>
+              <div class="rotor__inner"></div>
+              <div class="rotor__core"></div>
+            </div>
+            <div class="letters">
+              <span style="--i:0;--delay:0s">n</span>
+              <span style="--i:1;--delay:-10s">l</span>
+              <span style="--i:2;--delay:-8s">b</span>
+              <span style="--i:3;--delay:-6s">0</span>
+              <span style="--i:4;--delay:-4s">s</span>
+              <span style="--i:5;--delay:-2s">l</span>
+            </div>
+          </div>
+        </div>
       </div>
     </figure>
   </main>

@@ -1,10 +1,10 @@
 # h0me.
 
-静的な個人サイト。トップページは HTML / CSS / SVG のみ。
+静的な個人サイト。トップページは HTML / CSS のみ。
 ビルド、npm、外部CDN、音声入力は不要。
 
 ## 編集
-- `index.html`: トップページ、名前、文章、リンク、SVG作品。
+- `index.html`: トップページ、名前、リンク、回転するグラフィック。
 - `styles/site.css`: レイアウト、配色、アニメーション。
 - `shaders/` と `scripts/components/`: 将来再利用できる写真・WebGL用の部品（トップでは読み込まない）。
 
