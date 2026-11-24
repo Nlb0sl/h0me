@@ -34,47 +34,52 @@ function mount(canvas,ctx) {
     sprite.width=Math.ceil(w*dpr);sprite.height=Math.ceil(h*dpr);
     const g=sprite.getContext("2d");
     g.scale(dpr,dpr);
+    // A continuous turbulent density field, not individually shaded balls.
     const lobes=[];
-    const crest=random(.26,.43);
-    for(let i=0;i<8;i++){
-      const x=.13+i*.105+random(-.045,.045);
-      const rise=Math.sin(Math.PI*(i+.5)/8);
-      lobes.push([x,.67-rise*crest+random(-.035,.055),random(.105,.185),random(.18,.32)]);
-      lobes.push([x,.69+random(-.055,.04),random(.14,.23),random(.18,.26)]);
+    const peak=random(.25,.69);
+    const crest=random(.23,.39);
+    for(let i=0;i<10;i++){
+      const x=.12+i*.084+random(-.025,.025);
+      const rise=crest*Math.exp(-Math.pow((x-peak)/random(.20,.34),2));
+      const y=.66-rise*.7+random(-.045,.04);
+      lobes.push([x,y,random(.08,.155),random(.14,.22)+rise*.3]);
+      lobes.push([x,.72+random(-.035,.04),random(.09,.15),random(.10,.17)]);
+      if(i>0&&i<9&&Math.random()<.75){
+        lobes.push([x+random(-.045,.045),y-random(.07,.14),random(.035,.075),random(.055,.105)]);
+      }
     }
     function field(u,v){
-      let d=-5;
+      const wx=u+.075*(fbm(u*5+11,v*5,seed)-.5);
+      const wy=v+.095*(fbm(u*6,v*5+17,seed+1)-.5);
+      let density=0;
       for(const [x,y,rx,ry] of lobes){
-        const q=1-Math.hypot((u-x)/rx,(v-y)/ry);
-        // Smooth maximum: rounded, connected cloud lobes.
-        const k=.16,m=Math.max(k-Math.abs(d-q),0)/k;
-        d=Math.max(d,q)+m*m*k*.25;
+        const dx=(wx-x)/rx,dy=(wy-y)/ry;
+        const q=Math.max(0,1-(dx*dx+dy*dy)*.46);
+        density+=q*q;
       }
-      const ragged=.38*(fbm(u*13,v*10,seed)-.5);
-      return d+ragged-.08;
+      const turbulence=.85*(fbm(u*12,v*10,seed+2)-.5)
+        +.36*(fbm(u*33,v*25,seed+3)-.5);
+      const border=smooth(0,.07,u)*smooth(0,.07,1-u)*smooth(0,.07,v)*smooth(0,.09,1-v);
+      return (density+turbulence)*border-.48;
     }
-    const gap=layer.gap;
-    // Quantize color for a printed, halftone-like texture.
-    const colors=layer.palette;
+    const gap=layer.gap,colors=layer.palette;
     const paths=colors.map(()=>[]);
-    for(let y=gap/2;y<h;y+=gap){
-      for(let x=gap/2;x<w;x+=gap){
+    for(let row=0,y=gap/2;y<h;y+=gap,row++){
+      for(let col=0,x=gap/2+(row%2)*gap*.5;x<w;x+=gap,col++){
         const u=x/w,v=y/h,d=field(u,v);
-        const edge=smooth(-.08,.17,d);
+        const edge=smooth(-.07,.30,d);
         if(edge<.025)continue;
-        const grain=hash(Math.floor(x/gap),Math.floor(y/gap),seed+7);
-        if(grain>Math.min(1,edge*1.55))continue;
-        const billows=fbm(u*8+11,v*7+4,seed);
-        const detail=fbm(u*23,v*20,seed+1);
-        // Light-facing lobes and deep pockets of shade below overlapping lobes.
-        const slope=field(u+.009,v+.015)-field(u-.009,v-.015);
-        const underside=smooth(.39,.84,v);
-        const pockets=smooth(.34,.62,fbm(u*12+5,v*9+23,seed+2));
-        const t=clamp(.82 + slope*2.1 + (billows-.5)*1.25
-          + (detail-.5)*.22 - underside*.70 - pockets*.26);
-        const band=Math.round(t*(colors.length-1));
-        // Dark areas remain dense instead of disappearing into the sky.
-        const radius=gap*(.34+.16*t)*Math.sqrt(edge)*(.91+.14*grain);
+        const grain=hash(col,row,seed+7);
+        if(grain>Math.min(1,edge*1.5))continue;
+        // Diffuse light on a shared density surface; no seams between lobes.
+        const lightFacing=clamp((field(u+.012,v+.020)-field(u-.012,v-.020))*1.4,-.4,.4);
+        const billows=fbm(u*8+11,v*7+4,seed+4);
+        const shadow=smooth(.36,.75,fbm(u*10+5,v*8+23,seed+5));
+        const underside=smooth(.42,.86,v);
+        const t=clamp(.76+lightFacing+(billows-.5)*.94-underside*.47-shadow*.26);
+        const tone=t*(colors.length-1),lo=Math.floor(tone);
+        const band=Math.min(colors.length-1,lo+(hash(col,row,seed+19)<tone-lo?1:0));
+        const radius=gap*(.32+.16*t)*Math.sqrt(edge)*(.91+.14*grain);
         paths[band].push([x,y,radius]);
       }
     }
@@ -110,7 +115,7 @@ function mount(canvas,ctx) {
       let x=-layer.scale*.38;
       while(x<width+layer.scale*.2){
         const cloud=newCloud(layer,x);layer.clouds.push(cloud);
-        x+=cloud.w*random(.64,.83);
+        x+=cloud.w*random(1.05,1.40);
       }
     }
     last=0;draw(performance.now(),false);
@@ -128,7 +133,7 @@ function mount(canvas,ctx) {
         const first=layer.clouds[0];
         if(!first||first.x>-layer.scale*.12){
           const next=newCloud(layer,0);
-          next.x=(first?first.x:0)-next.w*random(.70,.88);
+          next.x=Math.min(-next.w,(first?first.x:0)-next.w*random(1.05,1.40));
           layer.clouds.unshift(next);
         }
       }
