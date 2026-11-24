@@ -1,11 +1,13 @@
 # h0me.
 
-静的な個人サイト。HTML / CSS / SVG のみ。
+静的な個人サイト。HTML / CSS / JavaScript（Canvas 2D）のみ。
 
 - `index.html`: ヘッダー、メイン、フッター。
 - `styles/site.css`: レイアウトと配色。
-- `assets/clouds.svg`: オリジナルのドット調の雲の背景。外部画像・ライブラリ不使用。
-- 写真スライドショー用の部品は再利用用に保存（トップページでは読み込まない）。
+- `scripts/clouds.js`: 丸いドットで構成する雲の自動生成と移動。外部ライブラリ不使用。
+- `assets/clouds.svg`: 以前の固定背景（現在未使用）。
+
+雲は再読み込みと画面外からの出現時に新しく生成する。2層の移動速度は clouds.js の speed（CSS px/秒）で調整できる。アニメーション中は生成済みのキャンバスを再利用し、非表示タブと視覚効果を減らす設定では移動を停止する。
 
 ローカルでは `python -m http.server 8000` を実行し http://localhost:8000 を開く。
 
