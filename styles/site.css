@@ -1,13 +1,30 @@
 :root {
   color-scheme: light;
   font-family: Arial, "Helvetica Neue", sans-serif;
+  --ink: #263a3c;
+  --rule: #263a3c40;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: #f3f2ee; color: #191b1a; }
-.shell { width: min(780px, calc(100% - 64px)); margin: 0 auto; }
-.masthead { padding: 30px 0 20px; border-bottom: 1px solid #c8cac3; }
+body {
+  margin: 0;
+  background: #91a6a9 url("../assets/clouds.svg") center bottom / cover no-repeat fixed;
+  color: var(--ink);
+}
+.shell {
+  width: min(780px, calc(100% - 64px));
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.masthead { padding: 30px 0 20px; border-bottom: 1px solid var(--rule); }
 .masthead h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.045em; }
+main { flex: 1; }
+.footer { padding: 16px 0 24px; border-top: 1px solid var(--rule); }
+.footer small { font-size: 12px; font-weight: 400; }
 @media(max-width: 480px) {
   .shell { width: calc(100% - 32px); }
   .masthead { padding-top: 22px; }
+  body { background-attachment: scroll; }
 }
