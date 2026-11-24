@@ -7,7 +7,16 @@ if (canvas) {
 
 function mount(canvas,ctx) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-  const random = (a,b) => a+Math.random()*(b-a);
+  // Stable initial composition on reload; later clouds still vary as they enter.
+  const initialSeed=0x4e4c4230;
+  let rng=initialSeed;
+  function nextRandom(){
+    rng=(rng+0x6D2B79F5)|0;
+    let t=Math.imul(rng^(rng>>>15),1|rng);
+    t^=t+Math.imul(t^(t>>>7),61|t);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  }
+  const random = (a,b) => a+nextRandom()*(b-a);
   const clamp = (v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   function smooth(a,b,x){const t=clamp((x-a)/(b-a));return t*t*(3-2*t);}
   function hash(x,y,seed){
@@ -44,7 +53,7 @@ function mount(canvas,ctx) {
       const y=.66-rise*.7+random(-.045,.04);
       lobes.push([x,y,random(.08,.155),random(.14,.22)+rise*.3]);
       lobes.push([x,.72+random(-.035,.04),random(.09,.15),random(.10,.17)]);
-      if(i>0&&i<9&&Math.random()<.75){
+      if(i>0&&i<9&&nextRandom()<.75){
         lobes.push([x+random(-.045,.045),y-random(.07,.14),random(.035,.075),random(.055,.105)]);
       }
     }
@@ -97,9 +106,12 @@ function mount(canvas,ctx) {
     return {sprite:makeCloud(w,h,layer),w,h,x,y};
   }
   function rebuild(){
-    width=Math.max(1,window.innerWidth);
-    height=Math.max(1,window.innerHeight);
-    dpr=Math.min(window.devicePixelRatio||1,1.5);
+    const w=Math.max(1,canvas.clientWidth||window.innerWidth);
+    const h=Math.max(1,canvas.clientHeight||window.innerHeight);
+    const ratio=Math.min(window.devicePixelRatio||1,1.5);
+    if(layers.length&&w===width&&h===height&&ratio===dpr)return;
+    width=w;height=h;dpr=ratio;
+    rng=initialSeed;
     canvas.width=Math.ceil(width*dpr);canvas.height=Math.ceil(height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const scale=Math.min(1060,Math.max(420,width*.70,height*.68));
@@ -137,7 +149,9 @@ function mount(canvas,ctx) {
           layer.clouds.unshift(next);
         }
       }
-      for(const c of layer.clouds)ctx.drawImage(c.sprite,c.x,c.y,c.w,c.h);
+      for(const c of layer.clouds){
+        if(c.x+c.w>0&&c.x<width)ctx.drawImage(c.sprite,c.x,c.y,c.w,c.h);
+      }
     }
     ctx.globalAlpha=1;
   }
@@ -152,10 +166,10 @@ function mount(canvas,ctx) {
     frame=0;last=0;
     if(!document.hidden&&!reduced.matches)frame=requestAnimationFrame(tick);
   }
-  let resizeFrame=0;
+  let resizeTimer=0;
   window.addEventListener("resize",()=>{
-    if(resizeFrame)cancelAnimationFrame(resizeFrame);
-    resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;rebuild();restart();});
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{rebuild();restart();},180);
   });
   document.addEventListener("visibilitychange",restart);
   reduced.addEventListener("change",restart);
