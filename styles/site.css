@@ -60,3 +60,43 @@ main { min-height: 0; }
 
 .clouds[hidden] { display: none; }
 .clouds--volumetric { display: block; }
+
+/* The blue stays ambiguous: neither a horizon nor a separate sea layer. */
+.clouds { z-index: 0; }
+.passages {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.shell { z-index: 2; }
+.passage {
+  position: absolute;
+  left: 0;
+  width: clamp(165px, 15vw, 220px);
+  height: auto;
+  transform: translateX(-100%);
+  opacity: 0;
+  animation-duration: 76s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+.passage--aircraft { top: 27%; animation-name: aircraft-passage; }
+.passage--ship { top: 45%; animation-name: ship-passage; }
+@keyframes aircraft-passage {
+  0%, 2% { transform: translateX(-100%); opacity: 0; }
+  2.5% { opacity: .95; }
+  28% { transform: translateX(100vw); opacity: .95; }
+  29%, 100% { transform: translateX(100vw); opacity: 0; }
+}
+@keyframes ship-passage {
+  0%, 46% { transform: translateX(-100%); opacity: 0; }
+  47% { opacity: .95; }
+  84% { transform: translateX(100vw); opacity: .95; }
+  85%, 100% { transform: translateX(100vw); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .passages { display: none; }
+}
