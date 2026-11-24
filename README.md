@@ -1,56 +1,35 @@
 # h0me.
 
-静的HTMLとネイティブJavaScript（ES Modules）による個人サイト。
-フレームワーク、npm、ビルド、サーバー側処理は不要。
+写真だけの静的サイト。HTML / CSS / ES Modules。ビルド・npm不要。
 
-## ローカル開発
+## 編集とプレビュー
 
-```sh
-git clone https://github.com/Nlb0sl/h0me.git
-cd h0me
-code .
-```
+VS Codeでフォルダを開き、推奨拡張機能 Microsoft Live Preview をインストール。
+index.html を開き、コマンドパレットの Live Preview: Show Preview から HTTP プレビューを開始。
+file:// で直接開くと ES Modules が動かないことがある。
 
-すでにclone済みなら `git pull` で更新。
-推奨拡張機能 Microsoft Live Preview (ms-vscode.live-server) をインストールし、index.html を開いて右上のプレビューアイコンを押す。編集に合わせてプレビューが更新される。
-ES Modules を使うので file:// で直接開かず、Live Preview の HTTP サーバーを使う。
+## 写真の追加
 
-## 構成
-
-- index.html: トップページ
-- pages/: 独立した静的HTMLページ
-- styles/tokens.css: 色・デザイントークン
-- styles/main.css: 共通スタイル
-- scripts/main.js: JSコンポーネントの登録・起動
-- scripts/components/: UI単位のJSモジュール
-- assets/: 画像・音声など
-
-## ページを増やす
-
-pages/notes/index.html をコピーし、タイトル、本文、相対パスを調整する。
-トップページに通常の a タグでリンクを追加する。ページ間移動はブラウザ標準のナビゲーションを使用する。
-
-## JS機能を増やす
-
-scripts/components/hello.js などを作成する。
+1. assets/photos/ に JPG、PNG、WebP などを入れる。
+2. scripts/data/photos.js の photos に追加する。例:
 
 ```js
-export function mount(element) {
-  element.textContent = "Hello!";
-}
+{ src: new URL("../../assets/photos/my-photo.webp", import.meta.url).href, alt: "写真の説明" },
 ```
 
-scripts/main.js の components に `hello: () => import("./components/hello.js")` を追加する。
-HTMLに `<div data-component="hello"></div>` を置く。
-JSなしでも本文とリンクを利用できるようにする。JSが不要なページではscriptを省略してもよい。
+3. 最初の写真を変更したら index.html の img の src と alt も変更すると JS 無効時にも表示される。
+
+sample-01〜03.svg は動作確認用の抽象的な仮画像。自分の写真で置き換える。
+左右キー、マウスを乗せたときの矢印、スマホのスワイプで切り替え。
+autoplayMs を 5000 などにすると自動再生。標準は手動。
+styles/main.css の --photo-fit を contain にすると全体表示、cover にすると画面いっぱいに表示。
 
 ## 公開
 
-GitHub Pages: Settings → Pages → main / (root)。
-プロジェクトサイトなのでルート絶対パスではなく、HTMLの位置からの相対パスを使う。
+GitHub Pages の Settings → Pages で main / (root) を指定。
 
 ```sh
 git add .
-git commit -m "Update website"
+git commit -m "Update photos"
 git push
 ```

@@ -3,45 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A small personal space on the internet.">
-  <meta name="color-scheme" content="light dark">
   <title>h0me.</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23181818'/%3E%3Cpath d='M14 30 32 14 50 30v20H36V37h-8v13H14z' fill='%23f7f7f4'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles/tokens.css">
   <link rel="stylesheet" href="./styles/main.css">
   <script type="module" src="./scripts/main.js"></script>
 </head>
 <body>
-  <div class="wrap" id="top">
-    <header>
-      <a class="brand" href="#top">h0me /</a>
-      <nav aria-label="メインナビゲーション" data-component="theme">
-        <a href="#archive">archive</a>
-        <a href="#about">about</a>
-        <a href="https://github.com/Nlb0sl/h0me">source ↗</a>
-      </nav>
-    </header>
-    <main>
-      <section class="hero" aria-labelledby="site-title">
-        <span class="label">PERSONAL SPACE / 001</span>
-        <h1 id="site-title">h0me.</h1>
-        <p class="intro">A little place on the internet.<br>インターネットの片隅に、小さな場所を。</p>
-      </section>
-      <section class="section" id="archive" aria-labelledby="archive-title">
-        <div class="section-head"><h2 id="archive-title">Archive</h2><span class="meta">INDEX / 03</span></div>
-        <!-- Add new archive entries here. Each page is ordinary static HTML. -->
-        <div class="entries">
-          <a class="entry" href="./pages/notes/"><span class="index">01 / NOTES</span><h3>Notes.</h3><p>日記、文章、考えごと。</p></a>
-          <a class="entry" href="./pages/works/"><span class="index">02 / WORKS</span><h3>Works.</h3><p>作ったもの、作品の記録。</p></a>
-          <a class="entry" href="./pages/lab/"><span class="index">03 / LAB</span><h3>Lab.</h3><p>実験、試作品、遊び場。</p></a>
-        </div>
-      </section>
-      <section class="section" id="about" aria-labelledby="about-title">
-        <div class="section-head"><h2 id="about-title">About</h2><span class="meta">INFORMATION</span></div>
-        <p class="note">ここは個人サイトです。少しずつ、好きなものを置いていく予定です。</p>
-      </section>
-    </main>
-    <footer><span>h0me. / personal website</span><a href="#top">Back to top ↑</a></footer>
-  </div>
+  <main class="slideshow" data-component="slideshow" aria-label="写真ギャラリー">
+    <img class="slideshow__image" src="./assets/photos/sample-01.svg" alt="仮の画像 1" draggable="false" fetchpriority="high">
+    <button class="slideshow__button slideshow__button--prev" type="button" aria-label="前の写真" hidden>‹</button>
+    <button class="slideshow__button slideshow__button--next" type="button" aria-label="次の写真" hidden>›</button>
+    <span class="sr-only" aria-live="polite" data-status></span>
+  </main>
 </body>
 </html>
