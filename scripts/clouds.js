@@ -164,14 +164,14 @@ function mount(canvas,ctx) {
   }
   function tick(now){
     frame=0;
-    if(document.hidden||reduced.matches)return;
+    if(document.hidden||reduced.matches||canvas.hidden)return;
     draw(now);
     frame=requestAnimationFrame(tick);
   }
   function restart(){
     if(frame)cancelAnimationFrame(frame);
     frame=0;last=0;
-    if(!document.hidden&&!reduced.matches)frame=requestAnimationFrame(tick);
+    if(!document.hidden&&!reduced.matches&&!canvas.hidden)frame=requestAnimationFrame(tick);
   }
   let resizeTimer=0;
   window.addEventListener("resize",()=>{
@@ -179,6 +179,8 @@ function mount(canvas,ctx) {
     resizeTimer=setTimeout(()=>{rebuild();restart();},180);
   });
   document.addEventListener("visibilitychange",restart);
+  document.addEventListener("clouds-volumetric-ready",restart);
+  document.addEventListener("clouds-fallback",()=>{draw(performance.now(),false);restart();});
   reduced.addEventListener("change",restart);
   rebuild();restart();
 }

@@ -5,8 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#91a6a9">
   <title>nlb0sl</title>
-  <link rel="stylesheet" href="./styles/site.css?v=11">
-  <script type="module" src="./scripts/clouds.js?v=19"></script>
+  <link rel="stylesheet" href="./styles/site.css?v=20">
+  <script type="module" src="./scripts/clouds.js?v=20"></script>
+  <script type="importmap">
+  {"imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/":"https://cdn.jsdelivr.net/npm/three@0.180.0/",
+    "postprocessing":"https://esm.sh/postprocessing@6.37.8?external=three",
+    "@takram/three-geospatial":"https://esm.sh/@takram/three-geospatial@0.9.1?bundle&external=three,postprocessing",
+    "@takram/three-atmosphere":"https://esm.sh/@takram/three-atmosphere@0.19.1?bundle&external=three,postprocessing,@takram/three-geospatial",
+    "@takram/three-clouds":"https://esm.sh/@takram/three-clouds@0.7.6?bundle&external=three,postprocessing,@takram/three-geospatial,@takram/three-atmosphere"
+  }}
+  </script>
+  <script type="module" src="./scripts/volumetric-clouds.js?v=1"></script>
 </head>
 <body>
   <canvas class="clouds" aria-hidden="true"></canvas>

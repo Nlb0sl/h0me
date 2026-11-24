@@ -12,3 +12,7 @@
 ローカルでは `python -m http.server 8000` を実行し http://localhost:8000 を開く。
 
 公開: GitHub Pages / main / (root)。
+
+## Volumetric clouds
+
+`scripts/volumetric-clouds.js` uses Takram's three-clouds with Three.js and postprocessing, then maps the cloud buffer to a circular halftone. WebGL2 and network access to the pinned CDN modules and upstream textures are required. The existing Canvas 2D generator remains the fallback. See [third-party notices](THIRD_PARTY_NOTICES.md). No npm or build step is required.

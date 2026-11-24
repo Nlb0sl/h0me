@@ -57,3 +57,6 @@ main { min-height: 0; }
   :root { --gutter: 20px; --inset: 24px; }
   .masthead h1 { font-size: 24px; }
 }
+
+.clouds[hidden] { display: none; }
+.clouds--volumetric { display: block; }
