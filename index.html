@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f2ee">
   <title>nlb0sl</title>
-  <link rel="stylesheet" href="./styles/site.css?v=3">
-  <script type="module" src="./scripts/site.js?v=3"></script>
+  <link rel="stylesheet" href="./styles/site.css?v=4">
 </head>
 <body>
   <main class="shell">
@@ -15,7 +14,7 @@
       <nav aria-label="リンク"><a href="https://github.com/Nlb0sl">GitHub ↗</a></nav>
     </header>
     <figure class="exhibit">
-      <div class="exhibit__frame" data-artwork>
+      <div class="exhibit__frame">
         <svg class="artwork" viewBox="0 0 480 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="art-title art-desc">
           <title id="art-title">光の輪</title>
           <desc id="art-desc">黒い背景に切り分けられた楕円形の輪が浮かび、細い光が静かに移動する。</desc>
@@ -80,14 +79,10 @@
             <g mask="url(#blades)">
               <rect width="480" height="440" fill="url(#base)"/>
               <g class="light-sweep"><rect x="-190" y="-30" width="190" height="500" fill="url(#light)" transform="rotate(-13 0 220)"/></g>
-              <g class="pointer-light"><rect x="-85" y="-40" width="170" height="520" fill="url(#light)" opacity=".45"/></g>
             </g>
           </g>
         </svg>
       </div>
-      <figcaption>
-        <button type="button" data-motion aria-pressed="false" hidden>停止</button>
-      </figcaption>
     </figure>
   </main>
 </body>

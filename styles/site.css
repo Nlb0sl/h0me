@@ -10,7 +10,7 @@
 body { margin: 0; background: var(--paper); color: var(--ink); }
 a { color: inherit; text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 4px; }
-a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .shell { width: min(780px, calc(100% - 64px)); margin: 0 auto; }
 .masthead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 30px 0 20px; border-bottom: 1px solid var(--rule); }
 .masthead h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.045em; }
@@ -19,15 +19,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
 .exhibit__frame { background: #151919; overflow: hidden; aspect-ratio: 480 / 440; }
 .artwork { display: block; width: 100%; height: 100%; }
 .light-sweep { animation: sweep 9s ease-in-out infinite alternate; }
-.pointer-light { transform: translateX(-180px); transition: transform .35s ease-out; }
 @keyframes sweep { 0% { transform: translateX(20px); } 100% { transform: translateX(640px); } }
-.exhibit__frame[data-paused="true"] .light-sweep { animation-play-state: paused; }
-.exhibit figcaption { display: flex; justify-content: flex-end; padding-top: 10px; }
-.exhibit figcaption button { border: 0; background: transparent; color: var(--muted); font: 11px system-ui, sans-serif; padding: 5px 0 5px 10px; cursor: pointer; }
-.exhibit figcaption button:hover { color: var(--ink); }
 @media(max-width: 480px) { .shell { width: calc(100% - 32px); } .masthead { padding-top: 22px; } }
 @media(prefers-reduced-motion: reduce) {
   .light-sweep { animation: none; transform: translateX(325px); }
-  .pointer-light { transition: none; }
-  .exhibit__frame[data-override="true"][data-paused="false"] .light-sweep { animation: sweep 9s ease-in-out infinite alternate; }
 }
