@@ -61,29 +61,31 @@ main { min-height: 0; }
 .clouds[hidden] { display: none; }
 .clouds--volumetric { display: block; }
 
-/* A single quiet, translucent surface for future content. */
+/* Clear glass: the moving background remains visible through the surface. */
 .clouds { z-index: 0; }
 .shell { z-index: 1; }
 .main {
   display: grid;
-  place-items: center;
-  padding-block: clamp(32px, 7vh, 80px);
+  align-items: stretch;
+  justify-items: center;
+  padding-block: clamp(20px, 3.5vh, 36px);
 }
 .glass-panel {
   position: relative;
   isolation: isolate;
-  width: min(100%, 760px);
-  min-height: clamp(280px, 48vh, 500px);
-  border-radius: 32px;
-  border: 1px solid rgba(255, 255, 255, .40);
-  background: rgba(248, 250, 247, .20);
-  -webkit-backdrop-filter: blur(7px) saturate(1.15);
-  backdrop-filter: blur(7px) saturate(1.15);
+  width: 100%;
+  min-height: clamp(320px, 66vh, 720px);
+  border-radius: 34px;
+  border: 1px solid rgba(255, 255, 255, .32);
+  background: rgba(255, 255, 255, .045);
+  -webkit-backdrop-filter: blur(2px) saturate(1.06) brightness(1.025);
+  backdrop-filter: blur(2px) saturate(1.06) brightness(1.025);
   box-shadow:
-    0 12px 40px rgba(35, 58, 65, .11),
-    0 2px 6px rgba(35, 58, 65, .05),
-    inset 0 1px 1px rgba(255, 255, 255, .65),
-    inset 0 -1px 2px rgba(255, 255, 255, .18);
+    0 12px 35px rgba(35, 58, 65, .08),
+    0 2px 5px rgba(35, 58, 65, .04),
+    inset 0 1px 1px rgba(255, 255, 255, .78),
+    inset 1px 0 2px rgba(255, 255, 255, .25),
+    inset 0 -2px 3px rgba(41, 65, 71, .12);
 }
 .glass-panel::before {
   content: "";
@@ -91,7 +93,12 @@ main { min-height: 0; }
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(145deg, rgba(255, 255, 255, .18), transparent 35%, transparent 70%, rgba(255, 255, 255, .08));
+  padding: 2px;
+  background: linear-gradient(150deg, rgba(255,255,255,.83), rgba(255,255,255,.09) 28%, transparent 53%, rgba(255,255,255,.47) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
 }
 .glass-panel__content {
   position: relative;
@@ -99,8 +106,8 @@ main { min-height: 0; }
   overflow-wrap: anywhere;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-panel { background: rgba(237, 244, 241, .72); }
+  .glass-panel { background: rgba(255, 255, 255, .09); }
 }
 @media (max-width: 480px) {
-  .glass-panel { border-radius: 24px; min-height: 45vh; }
+  .glass-panel { border-radius: 24px; min-height: 60vh; }
 }
