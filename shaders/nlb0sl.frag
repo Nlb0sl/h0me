@@ -57,34 +57,59 @@ mat2 rotation(float a) {
     float c=cos(a), s=sin(a);
     return mat2(c,s,-s,c);
 }
+// A living, uneven liquid silhouette. Negative values are inside.
+float liquid(vec2 p, float t, float seed) {
+    float a = atan(p.y, p.x + 0.00001);
+    float r = .32
+        + .095 * sin(a * 3.0 + t * 1.4 + seed)
+        + .060 * cos(a * 5.0 - t * 1.1 + seed * 2.0)
+        + .035 * sin(a * 7.0 + t * .75);
+    vec2 q = p * vec2(1.0, .88);
+    return length(q) - r;
+}
+
+// Seconds in one cycle. Each glyph resolves at a slightly different time.
+float resolveAmount(float t, float offset) {
+    float s = mod(t, 12.0);
+    float appear = smoothstep(2.0 + offset, 6.0 + offset, s);
+    float dissolve = smoothstep(8.5 + offset * .35, 11.5 + offset * .35, s);
+    return appear * (1.0 - dissolve);
+}
+
 void main() {
-    // Fit a three-column / two-row composition inside any canvas.
-    float aspect = u_resolution.x/max(u_resolution.y,1.0);
-    float unit = min(aspect/3.65, 1.0/2.9);
-    vec2 p = (v_uv-.5)*vec2(aspect,1.0)/unit;
+    float aspect = u_resolution.x / max(u_resolution.y, 1.0);
+    float unit = min(aspect / 3.65, 1.0 / 2.9);
+    vec2 p = (v_uv - .5) * vec2(aspect, 1.0) / unit;
     float t = u_time;
-    vec3 paper = vec3(.95,.95,.92);
-    vec3 ink = vec3(.10,.12,.11);
+    vec3 paper = vec3(.95, .95, .92);
+    vec3 ink = vec3(.10, .12, .11);
     float mask = 0.0;
-    for(int i=0;i<6;i++) {
-        float f=float(i);
-        vec2 center = vec2(float(i%3)-1.0, .69-float(i/3)*1.38);
-        float phase = f*1.71;
-        center += vec2(.035*sin(t*1.1+phase),.045*cos(t*1.4+phase));
-        vec2 q = p-center;
-        q = rotation(.13*sin(t*1.15+phase))*q;
-        q /= vec2(1.0+.10*sin(t*1.4+phase),1.0+.12*cos(t*1.2+phase));
-        // Smooth spatial warp: every part of each glyph moves differently.
-        vec2 old=q;
-        q.x += .105*sin(old.y*6.2+t*2.1+phase)
-             + .035*sin(old.y*11.0-t*1.3+phase);
-        q.y += .09*sin(old.x*7.0-t*1.7+phase)
-             + .03*cos(old.y*9.0+t*1.1+phase);
-        float thickness = .095+.024*sin(t*1.9+phase+q.y*5.0);
-        float d = glyph(q,i)-thickness;
-        float aa=max(fwidth(d),.002);
-        mask=max(mask,1.0-smoothstep(-aa,aa,d));
+
+    for (int i = 0; i < 6; ++i) {
+        float f = float(i);
+        float phase = f * 1.71;
+        float resolved = resolveAmount(t, f * .12);
+        float unrest = 1.0 - resolved;
+        vec2 center = vec2(float(i % 3) - 1.0, .69 - float(i / 3) * 1.38);
+        center += unrest * vec2(.055 * sin(t * 1.1 + phase),
+                                .075 * cos(t * 1.4 + phase));
+        vec2 q = rotation(unrest * .35 * sin(t * .9 + phase)) * (p - center);
+        vec2 original = q;
+
+        // The deformation fades away as the letter becomes legible.
+        q.x += unrest * (.23 * sin(original.y * 5.5 + t * 1.7 + phase)
+                        + .075 * cos(original.y * 10.0 - t + phase));
+        q.y += unrest * (.16 * sin(original.x * 6.0 - t * 1.4 + phase)
+                        + .055 * cos(original.y * 8.0 + t + phase));
+
+        float blob = liquid(q, t, phase);
+        float letter = glyph(q, i) - .105;
+
+        // Interpolate signed fields, rather than fading two separate images.
+        // The outline genuinely changes topology as holes and strokes emerge.
+        float d = mix(blob, letter, resolved);
+        float aa = max(fwidth(d), .002);
+        mask = max(mask, 1.0 - smoothstep(-aa, aa, d));
     }
-    vec3 color=mix(paper,ink,mask);
-    fragColor=vec4(color,1.0);
+    fragColor = vec4(mix(paper, ink, mask), 1.0);
 }
