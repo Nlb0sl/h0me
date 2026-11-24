@@ -34,58 +34,47 @@ function mount(canvas,ctx) {
     sprite.width=Math.ceil(w*dpr);sprite.height=Math.ceil(h*dpr);
     const g=sprite.getContext("2d");
     g.scale(dpr,dpr);
-    // Asymmetric cumulus towers, with smaller rounded lobes at their shoulders.
-    // Keep the base inside the sprite; no rectangular clipping at its edges.
     const lobes=[];
-    const add=(x,y,rx,ry,depth)=>lobes.push({x,y,rx,ry,depth});
-    const peak=random(.30,.65);
-    const profile=x=>Math.exp(-Math.pow((x-peak)/.23,2));
-    for(let i=0;i<7;i++){
-      const x=.16+i*.113+random(-.027,.027);
-      const rise=profile(x)*random(.19,.31);
-      const ry=random(.13,.22)+rise*.32;
-      const y=.67-rise*.65;
-      const rx=random(.075,.13)+rise*.09;
-      add(x,y,rx,ry,random(.82,1.10)*rx);
-      add(x,.76,random(.095,.145),random(.09,.14),.085);
-      if(i>0&&i<6){
-        const top=y-ry*.56;
-        add(x+random(-.055,.055),Math.max(.16,top),rx*random(.55,.82),ry*random(.49,.70),rx*.68);
-      }
+    const crest=random(.26,.43);
+    for(let i=0;i<8;i++){
+      const x=.13+i*.105+random(-.045,.045);
+      const rise=Math.sin(Math.PI*(i+.5)/8);
+      lobes.push([x,.67-rise*crest+random(-.035,.055),random(.105,.185),random(.18,.32)]);
+      lobes.push([x,.69+random(-.055,.04),random(.14,.23),random(.18,.26)]);
     }
-    const gap=layer.gap, colors=layer.palette;
+    function field(u,v){
+      let d=-5;
+      for(const [x,y,rx,ry] of lobes){
+        const q=1-Math.hypot((u-x)/rx,(v-y)/ry);
+        // Smooth maximum: rounded, connected cloud lobes.
+        const k=.16,m=Math.max(k-Math.abs(d-q),0)/k;
+        d=Math.max(d,q)+m*m*k*.25;
+      }
+      const ragged=.38*(fbm(u*13,v*10,seed)-.5);
+      return d+ragged-.08;
+    }
+    const gap=layer.gap;
+    // Quantize color for a printed, halftone-like texture.
+    const colors=layer.palette;
     const paths=colors.map(()=>[]);
-    for(let row=0,y=gap/2;y<h;y+=gap,row++){
-      for(let col=0,x=gap/2+(row%2)*gap*.5;x<w;x+=gap,col++){
-        const u=x/w,v=y/h;
-        const warp=.013*(fbm(u*14,v*12,seed)-.5);
-        const sx=u+warp,sy=v+warp*.8;
-        let silhouette=-10,depth=-1,lit=.5;
-        for(const l of lobes){
-          const dx=(sx-l.x)/l.rx,dy=(sy-l.y)/l.ry;
-          const q=1-dx*dx-dy*dy;
-          silhouette=Math.max(silhouette,q);
-          if(q>0){
-            const z=Math.sqrt(q),front=z*l.depth;
-            if(front>depth){
-              depth=front;
-              // Upper-left daylight on each rounded volume.
-              lit=clamp(.35-.39*dx-.62*dy+.45*z);
-            }
-          }
-        }
-        const edge=smooth(-.045,.18,silhouette);
-        if(edge<.015)continue;
-        const grain=hash(col,row,seed+7);
-        if(grain>Math.min(1,edge*1.35))continue;
-        const broad=fbm(u*8+11,v*7+4,seed+2);
-        const underside=smooth(.53,.90,v);
-        const shade=clamp(.17+.83*lit-.31*underside+(broad-.5)*.32);
-        const tone=shade*(colors.length-1);
-        const lo=Math.floor(tone),hi=Math.min(colors.length-1,lo+1);
-        const band=hash(col,row,seed+19)<tone-lo?hi:lo;
-        // Printed stippling: small but dense circles, with subtle size variation.
-        const radius=gap*(.29+.17*shade)*Math.sqrt(edge)*(.92+.16*grain);
+    for(let y=gap/2;y<h;y+=gap){
+      for(let x=gap/2;x<w;x+=gap){
+        const u=x/w,v=y/h,d=field(u,v);
+        const edge=smooth(-.08,.17,d);
+        if(edge<.025)continue;
+        const grain=hash(Math.floor(x/gap),Math.floor(y/gap),seed+7);
+        if(grain>Math.min(1,edge*1.55))continue;
+        const billows=fbm(u*8+11,v*7+4,seed);
+        const detail=fbm(u*23,v*20,seed+1);
+        // Light-facing lobes and deep pockets of shade below overlapping lobes.
+        const slope=field(u+.009,v+.015)-field(u-.009,v-.015);
+        const underside=smooth(.39,.84,v);
+        const pockets=smooth(.34,.62,fbm(u*12+5,v*9+23,seed+2));
+        const t=clamp(.82 + slope*2.1 + (billows-.5)*1.25
+          + (detail-.5)*.22 - underside*.70 - pockets*.26);
+        const band=Math.round(t*(colors.length-1));
+        // Dark areas remain dense instead of disappearing into the sky.
+        const radius=gap*(.34+.16*t)*Math.sqrt(edge)*(.91+.14*grain);
         paths[band].push([x,y,radius]);
       }
     }
@@ -97,9 +86,9 @@ function mount(canvas,ctx) {
     return sprite;
   }
   function newCloud(layer,x){
-    const w=Math.round(layer.scale*random(.74,1.32));
-    const h=Math.round(w*random(.49,.70));
-    const y=height*layer.level-h*random(.37,.53);
+    const w=Math.round(layer.scale*random(.78,1.30));
+    const h=Math.round(w*random(.44,.64));
+    const y=height*layer.level-h*random(.43,.67);
     return {sprite:makeCloud(w,h,layer),w,h,x,y};
   }
   function rebuild(){
@@ -110,18 +99,18 @@ function mount(canvas,ctx) {
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const scale=Math.min(1060,Math.max(420,width*.70,height*.68));
     layers=[
-      {scale:scale*.67,level:.68,speed:2.0,opacity:.75,gap:3.0,
-        palette:["#829ba5","#94a8ad","#a7b5b5","#bec4bf","#d2d2c4","#e5dfcc","#f0e7d5"],clouds:[]},
-      {scale:scale*.99,level:.86,speed:3.8,opacity:.92,gap:3.2,
-        palette:["#627e91","#7c96a3","#99adb3","#b4bfc0","#cdd1c8","#e0ddcd","#f0e7d3","#faf0db"],clouds:[]},
-      {scale:scale*1.30,level:1.04,speed:6.1,opacity:1,gap:3.5,
-        palette:["#526f85","#6c899e","#8da4b1","#a6b7bf","#c0c9c8","#d6d9cf","#e9e4d4","#f6eedb","#fff5e1"],clouds:[]}
+      {scale:scale*.69,level:.64,speed:2.7,opacity:.77,gap:3.7,
+        palette:["#71888e","#84999d","#9aa9a9","#b1bab4","#c7c9ba","#d9d7c0","#e5ddc5"],clouds:[]},
+      {scale:scale*.92,level:.83,speed:5.1,opacity:.92,gap:4.1,
+        palette:["#596f7b","#70878d","#8a9b9c","#a3aba5","#bcbbae","#d8cbb0","#e7d9b8","#f0e2c6"],clouds:[]},
+      {scale:scale*1.18,level:1.01,speed:8.2,opacity:1,gap:4.7,
+        palette:["#495f70","#607984","#7e9398","#98a6a6","#b0b5aa","#c8c4ae","#ded1b3","#efdfbf","#f6e8ce"],clouds:[]}
     ];
     for(const layer of layers){
-      let x=-layer.scale*.45;
+      let x=-layer.scale*.38;
       while(x<width+layer.scale*.2){
         const cloud=newCloud(layer,x);layer.clouds.push(cloud);
-        x+=cloud.w*random(.78,1.06);
+        x+=cloud.w*random(.64,.83);
       }
     }
     last=0;draw(performance.now(),false);
@@ -137,9 +126,9 @@ function mount(canvas,ctx) {
         // Enter at the left and retire at the right; no repeating strip.
         layer.clouds=layer.clouds.filter(c=>c.x<width+10);
         const first=layer.clouds[0];
-        if(!first||first.x>-layer.scale*.06){
+        if(!first||first.x>-layer.scale*.12){
           const next=newCloud(layer,0);
-          next.x=Math.min(-next.w,(first?first.x:0)-next.w*random(.78,1.06));
+          next.x=(first?first.x:0)-next.w*random(.70,.88);
           layer.clouds.unshift(next);
         }
       }
