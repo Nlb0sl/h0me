@@ -1,16 +1,15 @@
-// Procedural stippled clouds. Canvas 2D only, with cached cloud sprites.
+// Procedural stippled clouds. Canvas 2D fallback with cached cloud sprites.
+import { SCENE, setCloudRenderer, createFrameLoop } from "./cloud-runtime.js?v=1";
 const canvas = document.querySelector(".clouds");
 if (canvas) {
   const ctx = canvas.getContext("2d", {alpha:true});
   if (ctx) {
-    document.documentElement.dataset.cloudRenderer="canvas2d";
-    if(new URLSearchParams(location.search).get("clouds")==="raw")document.title="nlb0sl — Canvas fallback";
+    setCloudRenderer("canvas2d");
     mount(canvas,ctx);
   }
 }
 
 function mount(canvas,ctx) {
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   // Stable initial composition on reload; later clouds still vary as they enter.
   const initialSeed=0x4e4c4230;
   let rng=initialSeed;
@@ -39,7 +38,9 @@ function mount(canvas,ctx) {
       +.14*noise(x*4.11,y*4.11+19,seed)+.07*noise(x*8.2+37,y*8.2,seed);
   }
 
-  let width=1,height=1,dpr=1,layers=[],frame=0,last=0;
+  const { width, height } = SCENE;
+  const dpr = 1;
+  let layers = [];
   // Clouds differ in their proportions and height, not merely their position.
   function makeCloud(w,h,layer){
     const seed=Math.floor(random(1,1000000));
@@ -116,12 +117,7 @@ function mount(canvas,ctx) {
     const y=height*layer.level-h*random(.43,.67);
     return {sprite:makeCloud(w,h,layer),w,h,x,y};
   }
-  function rebuild(){
-    const w=Math.max(1,canvas.clientWidth||window.innerWidth);
-    const h=Math.max(1,canvas.clientHeight||window.innerHeight);
-    const ratio=Math.min(window.devicePixelRatio||1,1.5);
-    if(layers.length&&w===width&&h===height&&ratio===dpr)return;
-    width=w;height=h;dpr=ratio;
+  function buildScene(){
     rng=initialSeed;
     canvas.width=Math.ceil(width*dpr);canvas.height=Math.ceil(height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -141,16 +137,14 @@ function mount(canvas,ctx) {
         x+=cloud.w*random(.65,.85);
       }
     }
-    last=0;draw(performance.now(),false);
+    draw(0);
   }
-  function draw(now,advance=true){
-    const dt=advance&&last?Math.min((now-last)/1000,.05):0;
-    last=now;
+  function draw(dt){
     ctx.clearRect(0,0,width,height);
     for(const layer of layers){
       ctx.globalAlpha=layer.opacity;
       for(const cloud of layer.clouds)cloud.x+=layer.speed*dt;
-      if(advance){
+      if(dt > 0){
         // Enter at the left and retire at the right; no repeating strip.
         layer.clouds=layer.clouds.filter(c=>c.x<width+10);
         const first=layer.clouds[0];
@@ -166,25 +160,12 @@ function mount(canvas,ctx) {
     }
     ctx.globalAlpha=1;
   }
-  function tick(now){
-    frame=0;
-    if(document.hidden||reduced.matches||canvas.hidden)return;
-    draw(now);
-    frame=requestAnimationFrame(tick);
-  }
-  function restart(){
-    if(frame)cancelAnimationFrame(frame);
-    frame=0;last=0;
-    if(!document.hidden&&!reduced.matches&&!canvas.hidden)frame=requestAnimationFrame(tick);
-  }
-  let resizeTimer=0;
-  window.addEventListener("resize",()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer=setTimeout(()=>{rebuild();restart();},180);
+  const loop = createFrameLoop(draw, () => !canvas.hidden);
+  document.addEventListener("clouds-volumetric-ready", loop.restart);
+  document.addEventListener("clouds-fallback", () => {
+    draw(0);
+    loop.restart();
   });
-  document.addEventListener("visibilitychange",restart);
-  document.addEventListener("clouds-volumetric-ready",restart);
-  document.addEventListener("clouds-fallback",()=>{draw(performance.now(),false);restart();});
-  reduced.addEventListener("change",restart);
-  rebuild();restart();
+  buildScene();
+  loop.restart();
 }

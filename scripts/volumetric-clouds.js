@@ -1,5 +1,6 @@
 // Volumetric clouds rendered with @takram/three-clouds, then stippled.
 // The existing Canvas 2D background remains visible until this renderer is ready.
+import { SCENE, cloudMode as mode, setCloudRenderer, createFrameLoop } from "./cloud-runtime.js?v=1";
 import * as THREE from "three";
 import { Effect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
 import { PrecomputedTexturesLoader, DEFAULT_PRECOMPUTED_TEXTURES_URL } from "@takram/three-atmosphere";
@@ -8,7 +9,6 @@ import { CloudsEffect, CLOUD_SHAPE_TEXTURE_SIZE, CLOUD_SHAPE_DETAIL_TEXTURE_SIZE
 import { DataTextureLoader, parseUint8Array, STBNLoader, DEFAULT_STBN_URL, Geodetic } from "@takram/three-geospatial";
 
 const fallback=document.querySelector(".clouds");
-const mode=new URLSearchParams(location.search).get("clouds");
 if(fallback&&mode!=="2d")start().catch(error=>console.warn("Volumetric clouds unavailable; using Canvas 2D.",error));
 
 async function start(){
@@ -18,23 +18,25 @@ async function start(){
   const view=renderer.domElement;
   view.className="clouds clouds--volumetric";
   view.setAttribute("aria-hidden","true");
-  let failed=false,ready=false,frame=0,last=0,composer;
+  let failed=false,ready=false,composer,loop;
   function fail(error){
     if(failed)return;
-    failed=true;cancelAnimationFrame(frame);
+    failed=true;
+    loop?.dispose();
     view.remove();
     fallback.hidden=false;
-    document.documentElement.dataset.cloudRenderer="canvas2d";
-    if(mode==="raw")document.title="nlb0sl — Canvas fallback";
+    setCloudRenderer("canvas2d");
     document.dispatchEvent(new Event("clouds-fallback"));
     console.warn("Volumetric cloud rendering:",error);
+    composer?.dispose();
+    renderer.dispose();
   }
   renderer.debug.onShaderError=()=>fail(new Error("WebGL shader compilation failed"));
   view.addEventListener("webglcontextlost",e=>{e.preventDefault();fail(new Error("WebGL context lost"));},{once:true});
   try{
     const scene=new THREE.Scene();
     scene.background=new THREE.Color(0);
-    const camera=new THREE.PerspectiveCamera(53,1,10,1e6);
+    const camera=new THREE.PerspectiveCamera(53,SCENE.width / SCENE.height,10,1e6);
     const position=new Geodetic(0,0,180).toECEF();
     camera.position.copy(position);
     camera.up.set(1,0,0);
@@ -144,46 +146,28 @@ async function start(){
     composer.addPass(new RenderPass(scene,camera));
     composer.addPass(new EffectPass(camera,clouds));
     composer.addPass(new EffectPass(camera,halftone));
-    const reduced=matchMedia("(prefers-reduced-motion: reduce)");
-    function resize(){
-      const w=Math.max(1,window.innerWidth),h=Math.max(1,window.innerHeight);
-      // Render at a bounded resolution for a background, not a game.
-      const scale=Math.min(1,1440/w,1000/h);
-      camera.aspect=w/h;camera.updateProjectionMatrix();
-      composer.setSize(Math.round(w*scale),Math.round(h*scale));
-      halftone.uniforms.get("viewport").value.set(w,h);
-      if(ready&&reduced.matches)draw(performance.now());
-    }
-    function draw(now){
+    // Fixed logical viewport and bounded GPU resolution, independent of device.
+    composer.setSize(SCENE.renderWidth, SCENE.renderHeight);
+    // Some Three.js versions also set inline dimensions; CSS handles the crop.
+    view.style.width = "100%";
+    view.style.height = "100%";
+    halftone.uniforms.get("viewport").value.set(SCENE.width, SCENE.height);
+    function draw(dt){
       if(failed)return;
       try{
-        const dt=last?Math.min(.1,(now-last)/1000):0;last=now;
         composer.render(dt);
         if(!failed&&clouds.atmosphereOverlay?.map){
           if(!ready){
             ready=true;
             fallback.insertAdjacentElement("afterend",view);
             fallback.hidden=true;
-            document.documentElement.dataset.cloudRenderer="takram";
-            if(mode==="raw")document.title="nlb0sl — Takram raw clouds";
+            setCloudRenderer("takram");
             document.dispatchEvent(new Event("clouds-volumetric-ready"));
           }
         }
       }catch(error){fail(error);}
     }
-    function tick(now){
-      frame=0;
-      if(failed||document.hidden)return;
-      draw(now);
-      if(!failed&&!reduced.matches)frame=requestAnimationFrame(tick);
-    }
-    function restart(){
-      cancelAnimationFrame(frame);frame=0;last=0;
-      if(!failed&&!document.hidden)frame=requestAnimationFrame(tick);
-    }
-    window.addEventListener("resize",resize);
-    document.addEventListener("visibilitychange",restart);
-    reduced.addEventListener("change",restart);
-    resize();restart();
-  }catch(error){fail(error);composer?.dispose();renderer.dispose();}
+    loop = createFrameLoop(draw, () => !failed);
+    loop.restart();
+  }catch(error){fail(error);}
 }
