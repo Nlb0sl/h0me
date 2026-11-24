@@ -45,12 +45,16 @@ async function start(){
     clouds.shapeDetail=true;
     clouds.turbulence=true;
     clouds.cloudLayers[0].altitude=900;
-    clouds.cloudLayers[0].height=950;
-    clouds.cloudLayers[0].densityScale=.17;
+    clouds.cloudLayers[0].height=650;
+    clouds.cloudLayers[0].densityScale=.13;
     clouds.cloudLayers[1].altitude=1400;
-    clouds.cloudLayers[1].height=1800;
-    clouds.cloudLayers[1].densityScale=.16;
+    clouds.cloudLayers[1].height=1000;
+    clouds.cloudLayers[1].densityScale=.12;
     clouds.cloudLayers[2].densityScale=.001;
+    clouds.shapeRepeat.set(.00022,.00030,.00022);
+    clouds.cloudLayers[0].shapeDetailAmount=.55;
+    clouds.cloudLayers[1].shapeDetailAmount=.65;
+    clouds.turbulenceDisplacement*=.60;
     clouds.clouds.maxIterationCountToSun=3;
     clouds.clouds.accurateSunSkyLight=true;
     clouds.lightShafts=false;
@@ -58,7 +62,7 @@ async function start(){
     clouds.skipRendering=true;
     clouds.localWeatherVelocity.set(.00018,.00006);
     clouds.shapeVelocity.set(0,0,0);
-    clouds.sunDirection.set(.63,-.28,.72).normalize();
+    clouds.sunDirection.set(.85,.18,.49).normalize();
     // Use the upstream LUTs and 3D noise textures rather than an invented cloud field.
     const manager=new THREE.LoadingManager();
     const textureLoader=new THREE.TextureLoader(manager);
@@ -92,7 +96,7 @@ async function start(){
       void mainImage(const in vec4 inputColor,const in vec2 uv,out vec4 outputColor){
         vec3 sky=mix(linearColor(vec3(.675,.737,.718)),linearColor(vec3(.569,.651,.663)),uv.y);
         vec2 p=uv*viewport;
-        float pitch=4.2;
+        float pitch=3.8;
         float row=floor(p.y/pitch);
         vec2 shifted=p-vec2(mod(row,2.0)*pitch*.5,0.0);
         vec2 cell=(floor(shifted/pitch)+.5)*pitch;
@@ -100,15 +104,16 @@ async function start(){
         vec4 cloud=texture2D(cloudMap,clamp(center/viewport,vec2(0.0),vec2(1.0)));
         float opacity=clamp(cloud.a,0.0,1.0);
         float lum=dot(max(cloud.rgb,vec3(0.0)),vec3(.2126,.7152,.0722))/max(opacity,.035);
-        float shade=pow(clamp(lum*3.0/(1.0+lum*3.0),0.0,1.0),.85);
-        shade=floor(shade*6.0+.5)/6.0;
-        vec3 shadow=linearColor(vec3(.286,.373,.439));
-        vec3 middle=linearColor(vec3(.659,.706,.682));
-        vec3 light=linearColor(vec3(.965,.910,.808));
+        float shade=pow(clamp(lum*4.0/(1.0+lum*4.0),0.0,1.0),.65);
+        float threshold=fract(sin(dot(center,vec2(12.9898,78.233)))*43758.5453);
+        shade=floor(shade*9.0+threshold)/9.0;
+        vec3 shadow=linearColor(vec3(.43,.52,.55));
+        vec3 middle=linearColor(vec3(.73,.75,.72));
+        vec3 light=linearColor(vec3(.985,.960,.895));
         vec3 ink=mix(mix(shadow,middle,smoothstep(0.0,.6,shade)),light,smoothstep(.45,1.0,shade));
-        float radius=pitch*(.37+.09*shade)*sqrt(opacity);
+        float radius=pitch*(.34+.12*shade)*pow(opacity,.72);
         float mask=1.0-smoothstep(radius-.55,radius+.55,length(p-center));
-        mask*=smoothstep(.025,.25,opacity);
+        mask*=smoothstep(.015,.32,opacity);
         outputColor=vec4(mix(sky,ink,mask),1.0);
       }`;
     const halftone=new Effect("CloudHalftone",fragment,{uniforms:new Map([
